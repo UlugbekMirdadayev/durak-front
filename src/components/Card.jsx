@@ -27,6 +27,7 @@ const Image = styled.img.attrs({ alt: "card" })`
   aspect-ratio: 240 / 336;
   inset: 0;
   object-fit: contain;
+  pointer-events: none;
 `;
 
 const Card = forwardRef(
