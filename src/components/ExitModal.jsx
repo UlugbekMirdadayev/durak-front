@@ -4,6 +4,8 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { setExitVisible } from "../redux/exitSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { request } from "../service/api";
+import { toast } from "react-toastify";
 
 const Container = styled.div`
   position: fixed;
@@ -100,7 +102,7 @@ const ExitModal = () => {
   const startHeightRef = useRef(height); // Reference to track initial height
   const startYRef = useRef(0); // Reference to track initial Y position
 
- const onMouseMove = useCallback(
+  const onMouseMove = useCallback(
     (e) => {
       if (e.cancelable) e.preventDefault(); // Faqat cancelable bo'lsa defaultni bloklash
 
@@ -115,7 +117,8 @@ const ExitModal = () => {
         window.innerHeight - newHeight >
           (window?.Telegram?.WebApp?.contentSafeAreaInset?.top || 50)
           ? newHeight
-          : newHeight - (window?.Telegram?.WebApp?.contentSafeAreaInset?.top || 50)
+          : newHeight -
+              (window?.Telegram?.WebApp?.contentSafeAreaInset?.top || 50)
       );
     },
     [dispatch]
@@ -148,6 +151,8 @@ const ExitModal = () => {
     window.addEventListener(upListener, onMouseUp, { passive: false });
   };
 
+  const game = useSelector(({ exitgame }) => exitgame?.game);
+
   return (
     <Container $visible={visible}>
       <Overlay onMouseDown={onMouseDown} onTouchStart={onMouseDown} />
@@ -165,6 +170,25 @@ const ExitModal = () => {
           <button
             aria-label="Confirm Exit"
             onClick={() => {
+              const toastId = toast.loading("Выход из игры...");
+              request
+                .post("api/game/player/leave", { game_id: game?.id })
+                .then(({ data }) => {
+                  toast.update(toastId, {
+                    render: data?.message || "Выход из игры...",
+                    isLoading: false,
+                    autoClose: 3000,
+                  });
+                })
+
+                .catch((err) => {
+                  toast.update(toastId, {
+                    render: err?.response?.data?.message || "Выход из игры...",
+                    isLoading: false,
+                    autoClose: 3000,
+                  });
+                  console.log(err);
+                });
               navigate("/create-game");
               dispatch(setExitVisible(false));
             }}

@@ -199,7 +199,7 @@ const GamesList = () => {
             autoClose: 2000,
           });
 
-          dispatch(setGame(data?.data));
+          dispatch(setGame({ id }));
 
           navigate("/game");
         })
@@ -316,11 +316,8 @@ const GamesList = () => {
           )}
 
           <CardTitle>Глобальный поиск</CardTitle>
-          {gamesList?.map((item, index) => (
-            <Card
-              key={item?.id + index}
-              onClick={() => handleJoinGame(item?.id || index + 1)}
-            >
+          {gamesList?.map((item) => (
+            <Card key={item?.id} onClick={() => handleJoinGame(item?.id)}>
               <Row>
                 <Row>
                   <button>

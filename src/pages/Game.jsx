@@ -14,6 +14,7 @@ import KuzersComponent from "../components/KuzersComponent";
 import DepositGameComponent from "../components/DepositGameComponent";
 import MyCartsComponent from "../components/MyCartsComponent";
 import { DndContext } from "@dnd-kit/core";
+import usePusherGamesListener from "../hook/usePusherGamesListener";
 
 const GameWindow = styled.div`
   width: 100dvw;
@@ -101,6 +102,10 @@ const Game = () => {
       cards: [],
     }))
   );
+
+  const { gameStatus } = usePusherGamesListener();
+
+  console.log({ gameStatus });
 
   const handleSetBitas = useCallback((card, tableId) => {
     if (!card && !tableId)

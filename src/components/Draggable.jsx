@@ -9,17 +9,28 @@ function Draggable(props) {
     });
 
   const style = {
-    ...props.style,
-    transform: CSS.Translate.toString(transform),
+    transform: CSS.Translate.toString({
+      x: transform?.x,
+      y: transform?.y,
+      scaleX: transform?.scaleX,
+      scaleY: transform?.scaleY,
+    }),
     transition: isDragging ? "none" : "transform 0.3s ease",
     touchAction: "none", // Предотвращает конфликты с тач-событиями
     cursor: "grab",
+    ...props.style,
+
     // Применяем специальные стили во время перетаскивания
-    ...(isDragging && {
-      cursor: "grabbing",
-      zIndex: 999,
-    }),
+    ...(isDragging
+      ? {
+          cursor: "grabbing",
+          zIndex: 999,
+          rotate: "0deg",
+        }
+      : {}),
   };
+
+  console.log();
 
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>

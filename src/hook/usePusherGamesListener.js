@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Pusher from "pusher-js";
 import pako from "pako"; // Using pako instead of zlib for browser
 import { Buffer } from "buffer";
+import { useSelector } from "react-redux";
 const pusherConfig = {
   key: "e858f6b6e11dd35f3757",
   cluster: "eu",
@@ -10,6 +11,7 @@ const pusherConfig = {
 
 const usePusherGamesListener = () => {
   const [games, setGames] = useState([]);
+  const [gameStatus, setGameStatus] = useState(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   useEffect(() => {
@@ -22,20 +24,23 @@ const usePusherGamesListener = () => {
     };
   }, []);
 
+  const user = useSelector(({ user }) => user);
+  const game = useSelector(({ exitgame }) => exitgame?.game);
+
   useEffect(() => {
     const pusher = new Pusher(pusherConfig.key, {
       cluster: pusherConfig.cluster,
       authEndpoint: pusherConfig.authEndpoint,
       auth: {
         headers: {
-          Authorization: `Bearer 38|YhjgVWTJ1XgoFuJ09VzajvarVqdi7gpK1tFgT2Y33aa4cc23`,
-          "Socket-Token":
-            "sPr4LRL8TR30H8CmY5W1pXOCnt8N8AxyiG2OykynNOxgpIr5wWtR2xy3LvyI",
+          Authorization: `Bearer ${user?.token}`,
+          "Socket-Token": user?.socket_token,
         },
       },
     });
 
     const channel = pusher.subscribe(`private-games`);
+    const gameStatusChannel = pusher.subscribe(`private-game.${game?.id}`);
 
     channel.bind("pusher:subscription_succeeded", () => {
       console.log("Успешно подключено к private-games");
@@ -79,9 +84,14 @@ const usePusherGamesListener = () => {
         console.error("Error during decoding or decompression:", error);
       }
     });
-  }, [isOnline]);
 
-  return { games };
+    gameStatusChannel.bind("game.state.updated", (data) => {
+      console.log("Game status:", data);
+      setGameStatus(data);
+    });
+  }, [isOnline, user?.token, user?.socket_token, game?.id]);
+
+  return { games, gameStatus };
 };
 
 export default usePusherGamesListener;

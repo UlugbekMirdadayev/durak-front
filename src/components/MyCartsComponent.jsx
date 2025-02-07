@@ -16,7 +16,7 @@ const MyCarts = styled.div`
   overflow: visible;
 
   [role="button"] {
-    transition: bottom 0.3s ease;
+    transition: bottom 0.3s ease, rotate 0.3s ease;
     position: relative;
     bottom: 0;
     &:active {
@@ -79,7 +79,7 @@ const MyCartsComponent = ({ over, active, isAttackState }) => {
               ...calculateCardStyle(index, cards.length),
               minWidth: "32vw", // Kartaning kengligi
               minHeight: "44.8vw", // Kartaning balandligi
-              position: "absolute",
+              position: "fixed",
             }}
           >
             <Card
