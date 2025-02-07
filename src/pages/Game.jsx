@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 import sizeCalculator from "../hook/useSizeCalculator";
 import back from "../assets/images/game-back.png";
@@ -105,7 +105,9 @@ const Game = () => {
 
   const { gameStatus } = usePusherGamesListener();
 
-  console.log({ gameStatus });
+  useEffect(() => {
+    gameStatus;
+  }, [gameStatus]);
 
   const handleSetBitas = useCallback((card, tableId) => {
     if (!card && !tableId)
@@ -136,15 +138,12 @@ const Game = () => {
   }, []);
 
   function handleDragEnd({ over, active, delta }) {
-    if (isAttackState) {
-      // consisAttackStateole.log(over?.id, active?.id);
+    if (Math.abs(delta.y) > 50) {
+      setActive(JSON.parse(active?.id));
+      setOver(`table-0`);
+    } else if (isAttackState) {
       setOver(over?.id);
       setActive(JSON.parse(active?.id));
-
-      if (delta.y < -50) {
-        setActive(JSON.parse(active?.id));
-        setOver(`table-0`);
-      }
     } else {
       setOver(null);
       setActive(null);
@@ -181,7 +180,10 @@ const Game = () => {
     return false;
   };
 
-  function handleDragMove({ over, active }) {
+  function handleDragMove({ over, active, delta }) {
+    if (Math.abs(delta.y) > 50) {
+      over = { id: `table-0` };
+    }
     const isTable = tables.find((table) => table.id === over?.id);
     const isAttack = over?.id
       ? handleAttack(isTable?.cards[0], JSON.parse(active?.id), activeSuit)

@@ -131,9 +131,6 @@ const GameDecksComponent = ({
 }) => {
   // Оптимизируем useEffect
   useEffect(() => {
-    console.log("====================================");
-    console.log({ active });
-    console.log("====================================");
     if (!active || !over || !isAttackState) return;
 
     setTables((prev) =>

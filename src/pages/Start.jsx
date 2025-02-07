@@ -58,6 +58,7 @@ const user = {
   allows_write_to_pm: telegram?.allows_write_to_pm,
   // photo_url: telegram?.photo_url,
   photo_url: telegram?.photo_url,
+  
 
   // chat_id: 7793268248,
   // first_name: "Ulugbek Mirdadaev",
