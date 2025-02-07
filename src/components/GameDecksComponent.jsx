@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import Card from "./Card";
 import sizeCalculator from "../hook/useSizeCalculator";
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useState, useCallback } from "react";
 import { useSprings, animated } from "@react-spring/web";
 import Droppable from "./Droppable";
 import PropTypes from "prop-types";
@@ -54,129 +54,106 @@ const EmptyCard = styled(EmptyCardIcon)`
 
 const AnimatedCard = animated(Card); // React Spring animatsiyali karta
 
-const GameDecksComponent = ({ over, active }) => {
-  // Kartalar uchun animatsiya holatlarini yaratish
-  const [springs] = useSprings(3, () => ({
-    from: { scale: 1.1, transform: `translateY(-20px)` },
-    to: { scale: 1, transform: `translateY(0px)` },
-    config: { mass: 1, tension: 200, friction: 20, duration: 100 },
+const AnimatedCards = memo(({ tableId, cards }) => {
+  const [springs] = useSprings(cards.length, () => ({
+    from: {
+      transform: "scale(1.1) translateY(-20px)",
+      opacity: 0,
+    },
+    to: {
+      transform: "scale(1) translateY(0px)",
+      opacity: 1,
+    },
+    config: { mass: 1, tension: 200, friction: 20 },
   }));
 
-  const [tables, setTables] = useState([
-    {
-      id: "table-0",
-      cards: [],
-    },
-    {
-      id: "table-1",
-      cards: [],
-    },
+  AnimatedCards.displayName = "AnimatedCards";
+  if (!cards.length) return <EmptyCard />;
 
-    {
-      id: "table-2",
-      cards: [],
-    },
+  return cards.map((cardItem, indexItem) => (
+    <AnimatedCard
+      key={`${tableId}-${indexItem}`}
+      style={springs[indexItem]}
+      rank={cardItem?.rank}
+      suit={cardItem?.suit}
+      image={cardItem?.image}
+      index={indexItem}
+    />
+  ));
+});
 
-    {
-      id: "table-3",
-      cards: [],
-    },
+AnimatedCards.propTypes = {
+  tableId: PropTypes.string.isRequired,
+  cards: PropTypes.array.isRequired,
+  active: PropTypes.object,
+  over: PropTypes.string,
+};
 
-    {
-      id: "table-4",
-      cards: [],
-    },
-
-    {
-      id: "table-5",
-      cards: [],
-    },
-  ]);
-
-  useEffect(() => {
-    if (active && over) {
-      setTables((prev) =>
-        prev.map(({ id, cards }) => {
-          if (id === over) {
-            return { id, cards: [...cards, active] };
-          }
-          return { id, cards };
-        })
+// Выносим CardRow как отдельный мемоизированный компонент
+const CardRow = memo(({ startIndex, tables, renderCards }) => (
+  <div className="cards-block">
+    {[0, 1, 2].map((index) => {
+      const tableId = `table-${index + startIndex}`;
+      return (
+        <Droppable
+          key={tableId}
+          disabled={tables.find((t) => t.id === tableId)?.cards?.length === 2}
+          id={tableId}
+          style={{ position: "relative" }}
+        >
+          {renderCards(tableId)}
+        </Droppable>
       );
-    }
+    })}
+  </div>
+));
+
+CardRow.displayName = "CardRow";
+
+CardRow.propTypes = {
+  startIndex: PropTypes.number.isRequired,
+  tables: PropTypes.array.isRequired,
+  renderCards: PropTypes.func.isRequired,
+};
+
+const GameDecksComponent = ({ over, active }) => {
+  // Оптимизируем начальное состояние таблиц
+  const [tables, setTables] = useState(
+    Array.from({ length: 6 }, (_, index) => ({
+      id: `table-${index}`,
+      cards: [],
+    }))
+  );
+
+  // Оптимизируем useEffect
+  useEffect(() => {
+    if (!active || !over) return;
+
+    setTables((prev) =>
+      prev.map((table) =>
+        table.id === over
+          ? { ...table, cards: [...table.cards, active] }
+          : table
+      )
+    );
   }, [active, over]);
+
+  // Мемоизируем функцию renderCards
+  const renderCards = useCallback(
+    (tableId) => {
+      const table = tables.find((t) => t.id === tableId);
+      return <AnimatedCards tableId={tableId} cards={table?.cards || []} />;
+    },
+    [tables]
+  );
 
   return (
     <Deck>
       <div className="row">
-        <div className="cards-block">
-          {springs.map((style, card) => (
-            <Droppable
-              disabled={
-                tables?.find((table) => table?.id === `table-${card}`)?.cards
-                  ?.length === 2
-              }
-              id={`table-${card}`}
-              key={card}
-              style={{
-                position: "relative",
-              }}
-            >
-              {tables?.find((table) => table?.id === `table-${card}`)?.cards
-                ?.length > 0 ? (
-                tables
-                  ?.find((table) => table.id === `table-${card}`)
-                  ?.cards?.map((cardItem, indexItem) => (
-                    <AnimatedCard
-                      style={style}
-                      rank={cardItem?.rank}
-                      suit={cardItem?.suit}
-                      image={cardItem?.image}
-                      index={indexItem}
-                      key={indexItem}
-                    />
-                  ))
-              ) : (
-                <EmptyCard />
-              )}
-            </Droppable>
-          ))}
-        </div>
+        <CardRow startIndex={0} tables={tables} renderCards={renderCards} />
       </div>
       <div className="row">
-        <div className="cards-block">
-          {springs.map((style, card) => (
-            <Droppable
-              disabled={
-                tables?.find((table) => table?.id === `table-${card + 3}`)
-                  ?.cards?.length === 2
-              }
-              id={`table-${card + 3}`}
-              style={{
-                position: "relative",
-              }}
-              key={card}
-            >
-              {tables?.find((table) => table?.id === `table-${card + 3}`)?.cards
-                ?.length > 0 ? (
-                tables
-                  ?.find((table) => table.id === `table-${card + 3}`)
-                  ?.cards?.map((cardItem, indexItem) => (
-                    <AnimatedCard
-                      style={style}
-                      rank={cardItem?.rank}
-                      suit={cardItem?.suit}
-                      image={cardItem?.image}
-                      index={indexItem}
-                      key={indexItem}
-                    />
-                  ))
-              ) : (
-                <EmptyCard />
-              )}
-            </Droppable>
-          ))}
-        </div>
+        <CardRow startIndex={3} tables={tables} renderCards={renderCards} />
       </div>
     </Deck>
   );
