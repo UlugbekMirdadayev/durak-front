@@ -1,0 +1,99 @@
+name: React Frontend Deployment
+
+env:
+  DOMAIN: durak.frensgo.org
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+
+      - name: Deploy to server
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Move build to server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+            # Start SSH Agent
+            eval $(ssh-agent -s)
+            ssh-add ~/.ssh/durak-front
+
+            # Navigate to project directory
+            cd web/durak.frensgo.org/public_html/
+
+            # Save any unstaged changes and pull latest updates
+            git stash
+            git pull origin main
+
+            # Check if package.json or package-lock.json has changed
+            if git diff --name-only HEAD HEAD~1 | grep -E 'package(-lock)?.json'; then
+              echo "package.json or package-lock.json has changed. Running npm install."
+              npm install --force
+            else
+              echo "No changes in package files. Skipping npm install."
+            fi
+
+            # Ensure vite is installed
+            if ! command -v vite &> /dev/null; then
+              echo "Vite not found, installing locally..."
+              npm install --save-dev vite
+            fi
+
+            REQUIRED_FILES=("src/App.jsx" "package.json")
+            MISSING=false
+
+            for file in "${REQUIRED_FILES[@]}"; do
+                if [ ! -f "$file" ]; then
+                echo "Ogohlantirish: Kerakli fayl yo'q: $file"
+                MISSING=true
+            fi
+            done
+
+            if [ "$MISSING" = false ]; then
+                npm run build || echo "Build failed!"
+            else
+                echo "Kerakli fayllar yo'q, build o'tkazib yuborildi."
+            fi
+
+            # Copy .htaccess if it exists
+            if [ -f ".htaccess" ]; then
+              cp .htaccess dist/.htaccess
+              rm .htaccess
+            else
+              echo "Warning: .htaccess file not found. Skipping."
+            fi
+
+            echo "Build has been moved and cleaned up successfully!"
+          EOF
+
+  notify:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Send telegram message on push
+          uses: appleboy/telegram-action@master
+          with:
+            to: ${{ secrets.TELEGRAM_CHAT_ID }}
+            token: ${{ secrets.TELEGRAM_TOKEN }}
+            message: |
+              Deployment complete 🚀 
+              ${{ github.actor }} created commit:
+              Commit made by: ${{ github.event.commits[0].author.name }}
+              Commit message: ${{ github.event.commits[0].message }}
+              Repository: ${{ github.repository }}
+              See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}

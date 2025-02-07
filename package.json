@@ -1,0 +1,45 @@
+{
+  "name": "game-durak",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@react-spring/web": "^9.7.5",
+    "@reduxjs/toolkit": "^2.5.0",
+    "@tonconnect/ui-react": "^2.0.11",
+    "axios": "^1.7.9",
+    "buffer": "^6.0.3",
+    "howler": "^2.2.4",
+    "pako": "^2.1.0",
+    "pusher-js": "^8.4.0",
+    "react": "^18.3.1",
+    "react-beautiful-dnd": "^13.1.1",
+    "react-dom": "^18.3.1",
+    "react-easy-crop": "^5.2.0",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^7.1.2",
+    "react-toastify": "^11.0.3",
+    "styled-components": "^6.1.14",
+    "uuid": "^11.0.5",
+    "vite-plugin-node-polyfills": "^0.23.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.16",
+    "globals": "^15.14.0",
+    "vite": "^6.0.5"
+  }
+}

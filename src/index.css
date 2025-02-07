@@ -1,0 +1,59 @@
+@font-face {
+  font-family: "Pribambas";
+  src: local("Pribambas Regular"), local("Pribambas-Regular"),
+    url("./assets/fonts/Pribambas-Regular.woff2") format("woff2"),
+    url("./assets/fonts/Pribambas-Regular.woff") format("woff"),
+    url("./assets/fonts/Pribambas-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  list-style: none;
+  text-decoration: none;
+  outline: none;
+  user-select: none;
+  font-family: "Roboto", serif;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+body {
+  background-color: #EFEFF4;
+  background-image: url("./assets/images/bg-welcome.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+.russo {
+  font-family: "Russo One", serif;
+}
+
+.roboto {
+  font-family: "Roboto", serif;
+}
+
+.pribambas {
+  font-family: "Pribambas", serif;
+}
+
+.poppins {
+  font-family: "Poppins", serif;
+}
+
+.rubik {
+  font-family: "Rubik", serif;
+}
