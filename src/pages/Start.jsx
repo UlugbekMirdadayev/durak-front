@@ -39,18 +39,25 @@ const Title = styled.h1`
 `;
 const telegram = window.Telegram?.WebApp?.initDataUnsafe?.user || {};
 const user = {
-  chat_id: 1115496160,
-  first_name: "Улугбек",
-  last_name: "",
-  username: "Ulugbek_Mirdadaev",
-  allows_write_to_pm: telegram?.allows_write_to_pm,
-  photo_url:
-    "https://t.me/i/userpic/320/FYPIxBLeDoZB7moBU55r8_qu6qo0bWcI8yNW1k8LpnA.svg",
+  // chat_id: 1115496160,
+  // first_name: "Улугбек",
+  // last_name: "",
+  // username: "Ulugbek_Mirdadaev",
+  // allows_write_to_pm: telegram?.allows_write_to_pm,
+  // photo_url:
+  //   "https://t.me/i/userpic/320/FYPIxBLeDoZB7moBU55r8_qu6qo0bWcI8yNW1k8LpnA.svg",
 
   // chat_id: 1115496160,
   // first_name: "Улугбек",
   // last_name: "Мирдадаев",
   // username: "Ulugbek_Mirdadaev",
+  chat_id: telegram?.id,
+  first_name: telegram?.first_name,
+  last_name: telegram?.last_name,
+  username: telegram?.username,
+  allows_write_to_pm: telegram?.allows_write_to_pm,
+  // photo_url: telegram?.photo_url,
+  photo_url: telegram?.photo_url,
 
   // chat_id: 7793268248,
   // first_name: "Ulugbek Mirdadaev",
