@@ -1,8 +1,9 @@
 import styled from "styled-components";
 import sizeCalculator from "../hook/useSizeCalculator";
-import { BackImage, deck } from "../helper/deck";
+import { BackImage } from "../helper/deck";
 import { useState, memo } from "react";
 import Card from "./Card";
+import PropTypes from "prop-types";
 
 const Bitas = styled.div`
   position: absolute;
@@ -25,12 +26,12 @@ const Bitas = styled.div`
   }
 `;
 
-const BitasComponent = () => {
+const BitasComponent = ({ bitas }) => {
   const [updatePosition, setUpdatePosition] = useState(0);
   return (
     <Bitas onClick={() => setUpdatePosition(Math.random() * 1)}>
       <div className="cards">
-        {deck.map((card, index) => (
+        {bitas?.map((card, index) => (
           <Card
             key={index}
             rank={card.rank}
@@ -49,6 +50,10 @@ const BitasComponent = () => {
       </div>
     </Bitas>
   );
+};
+
+BitasComponent.propTypes = {
+  bitas: PropTypes.array.isRequired,
 };
 
 export default memo(BitasComponent);

@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import Card from "./Card";
 import sizeCalculator from "../hook/useSizeCalculator";
-import { memo, useEffect, useState, useCallback } from "react";
+import { memo, useEffect, useCallback } from "react";
 import { useSprings, animated } from "@react-spring/web";
 import Droppable from "./Droppable";
 import PropTypes from "prop-types";
@@ -54,7 +54,7 @@ const EmptyCard = styled(EmptyCardIcon)`
 
 const AnimatedCard = animated(Card); // React Spring animatsiyali karta
 
-const AnimatedCards = memo(({ tableId, cards }) => {
+const AnimatedCards = memo(({ tableId, cards, handleSetBitas }) => {
   const [springs] = useSprings(cards.length, () => ({
     from: {
       transform: "scale(1.1) translateY(-20px)",
@@ -78,6 +78,7 @@ const AnimatedCards = memo(({ tableId, cards }) => {
       suit={cardItem?.suit}
       image={cardItem?.image}
       index={indexItem}
+      onClick={() => handleSetBitas(cardItem, tableId)}
     />
   ));
 });
@@ -87,6 +88,7 @@ AnimatedCards.propTypes = {
   cards: PropTypes.array.isRequired,
   active: PropTypes.object,
   over: PropTypes.string,
+  handleSetBitas: PropTypes.func.isRequired,
 };
 
 // Выносим CardRow как отдельный мемоизированный компонент
@@ -116,15 +118,13 @@ CardRow.propTypes = {
   renderCards: PropTypes.func.isRequired,
 };
 
-const GameDecksComponent = ({ over, active }) => {
-  // Оптимизируем начальное состояние таблиц
-  const [tables, setTables] = useState(
-    Array.from({ length: 6 }, (_, index) => ({
-      id: `table-${index}`,
-      cards: [],
-    }))
-  );
-
+const GameDecksComponent = ({
+  over,
+  active,
+  tables,
+  setTables,
+  handleSetBitas,
+}) => {
   // Оптимизируем useEffect
   useEffect(() => {
     if (!active || !over) return;
@@ -136,16 +136,24 @@ const GameDecksComponent = ({ over, active }) => {
           : table
       )
     );
-  }, [active, over]);
+  }, [active, over, setTables]);
 
   // Мемоизируем функцию renderCards
   const renderCards = useCallback(
     (tableId) => {
       const table = tables.find((t) => t.id === tableId);
-      return <AnimatedCards tableId={tableId} cards={table?.cards || []} />;
+      return (
+        <AnimatedCards
+          tableId={tableId}
+          cards={table?.cards || []}
+          handleSetBitas={handleSetBitas}
+        />
+      );
     },
-    [tables]
+    [tables, handleSetBitas]
   );
+
+  // Мемоизируем функцию handleSetBitas
 
   return (
     <Deck>
@@ -162,6 +170,10 @@ const GameDecksComponent = ({ over, active }) => {
 GameDecksComponent.propTypes = {
   over: PropTypes.string,
   active: PropTypes.object,
+  setBitas: PropTypes.func,
+  tables: PropTypes.array.isRequired,
+  setTables: PropTypes.func.isRequired,
+  handleSetBitas: PropTypes.func.isRequired,
 };
 
 export default memo(GameDecksComponent);

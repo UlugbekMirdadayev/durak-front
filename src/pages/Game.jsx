@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import styled from "styled-components";
 import sizeCalculator from "../hook/useSizeCalculator";
 import back from "../assets/images/game-back.png";
@@ -93,6 +93,28 @@ const Game = () => {
   const [usersDone, setUsersDone] = useState(false);
   const [over, setOver] = useState(null);
   const [active, setActive] = useState(null);
+  const [bitas, setBitas] = useState([]);
+  const [tables, setTables] = useState(
+    Array.from({ length: 6 }, (_, index) => ({
+      id: `table-${index}`,
+      cards: [],
+    }))
+  );
+
+  const handleSetBitas = useCallback((card, tableId) => {
+    setTables((prev) => {
+      const newBitas = prev.find((table) => table.id === tableId).cards;
+      setBitas((oldBitas) => [...oldBitas, ...newBitas]);
+      return prev.map((table) =>
+        table.id === tableId
+          ? {
+              ...table,
+              cards: [],
+            }
+          : table
+      );
+    });
+  }, []);
 
   function handleDragEnd({ over, active }) {
     // console.log(over?.id, active?.id);
@@ -114,7 +136,6 @@ const Game = () => {
         <>
           <KuzersComponent />
           <DepositGameComponent />
-          <BitasComponent />
         </>
       ) : (
         <>
@@ -123,9 +144,15 @@ const Game = () => {
           </ShareButton>
         </>
       )}
-
+      <BitasComponent bitas={bitas} />
       <DndContext onDragEnd={handleDragEnd} onDragMove={handleDragMove}>
-        <GameDecksComponent over={over} active={active} />
+        <GameDecksComponent
+          over={over}
+          active={active}
+          tables={tables}
+          setTables={setTables}
+          handleSetBitas={handleSetBitas}
+        />
         <MyCartsComponent over={over} active={active} />
       </DndContext>
 
