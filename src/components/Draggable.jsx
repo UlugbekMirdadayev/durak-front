@@ -10,10 +10,18 @@ function Draggable(props) {
     ...props.style,
     // Outputs `translate3d(x, y, 0)`
     transform: CSS.Translate.toString(transform),
+    touchAction: 'none',
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      {...listeners} 
+      {...attributes}
+      role="button"
+      tabIndex={0}
+    >
       {props.children}
     </div>
   );
