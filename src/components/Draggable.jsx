@@ -30,8 +30,6 @@ function Draggable(props) {
       : {}),
   };
 
-  console.log();
-
   return (
     <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
       {props.children}

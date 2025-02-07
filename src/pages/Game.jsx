@@ -135,11 +135,16 @@ const Game = () => {
     });
   }, []);
 
-  function handleDragEnd({ over, active }) {
+  function handleDragEnd({ over, active, delta }) {
     if (isAttackState) {
       // consisAttackStateole.log(over?.id, active?.id);
       setOver(over?.id);
       setActive(JSON.parse(active?.id));
+
+      if (delta.y < -50) {
+        setActive(JSON.parse(active?.id));
+        setOver(`table-0`);
+      }
     } else {
       setOver(null);
       setActive(null);
@@ -183,7 +188,6 @@ const Game = () => {
       : false;
     setOver(null);
     setActive(null);
-    // console.log({ isAttack, over, active });
 
     setIsAttackState(isAttack);
   }
