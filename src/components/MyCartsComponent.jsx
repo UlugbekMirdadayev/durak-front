@@ -26,7 +26,7 @@ const MyCarts = styled.div`
   }
 `;
 
-const MyCartsComponent = ({ over, active }) => {
+const MyCartsComponent = ({ over, active, isAttackState }) => {
   const [cards, setCards] = useState(deck?.filter((_, index) => index < 25));
   const calculateCardStyle = (index, totalCards) => {
     const calculateSpacing = (cardCount) => (10 * 25) / cardCount;
@@ -48,14 +48,14 @@ const MyCartsComponent = ({ over, active }) => {
   };
 
   useEffect(() => {
-    if (active && over) {
+    if (active && over && isAttackState) {
       setCards((prev) =>
         prev?.filter((card) =>
           card.rank === active.rank && card.suit === active.suit ? false : true
         )
       );
     }
-  }, [active, over]);
+  }, [active, over, isAttackState]);
 
   return (
     <MyCarts>
@@ -102,6 +102,7 @@ const MyCartsComponent = ({ over, active }) => {
 MyCartsComponent.propTypes = {
   over: PropTypes.string,
   active: PropTypes.object,
+  isAttackState: PropTypes.bool,
 };
 
 export default memo(MyCartsComponent);

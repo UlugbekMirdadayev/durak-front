@@ -101,7 +101,14 @@ const AvatarMe = styled.img`
   position: relative;
 `;
 
-const BottomBar = ({ Button, ButtonInner, dispatch }) => {
+const BottomBar = ({
+  Button,
+  ButtonInner,
+  dispatch,
+  setUsersDone,
+  usersDone,
+  handleSetBitas,
+}) => {
   const user = useSelector(({ user }) => user);
   return (
     <BottomBarStyle>
@@ -189,7 +196,6 @@ const BottomBar = ({ Button, ButtonInner, dispatch }) => {
           }}
         >
           {user?.first_name || user?.last_name || user?.username}
-
         </span>
       </Center>
       <Button
@@ -198,8 +204,15 @@ const BottomBar = ({ Button, ButtonInner, dispatch }) => {
           transform: "none",
           width: sizeCalculator(133),
         }}
+        onClick={() => {
+          if (usersDone) {
+            handleSetBitas();
+          } else {
+            setUsersDone(true);
+          }
+        }}
       >
-        <ButtonInner>Готов</ButtonInner>
+        <ButtonInner>{usersDone ? "Бита" : "Готов"}</ButtonInner>
       </Button>
     </BottomBarStyle>
   );
@@ -209,6 +222,9 @@ BottomBar.propTypes = {
   Button: PropTypes.elementType,
   ButtonInner: PropTypes.elementType,
   dispatch: PropTypes.func,
+  setUsersDone: PropTypes.func,
+  usersDone: PropTypes.bool,
+  handleSetBitas: PropTypes.func,
 };
 
 export default BottomBar;

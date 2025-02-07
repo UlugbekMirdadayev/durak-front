@@ -54,7 +54,7 @@ const EmptyCard = styled(EmptyCardIcon)`
 
 const AnimatedCard = animated(Card); // React Spring animatsiyali karta
 
-const AnimatedCards = memo(({ tableId, cards, handleSetBitas }) => {
+const AnimatedCards = memo(({ tableId, cards }) => {
   const [springs] = useSprings(cards.length, () => ({
     from: {
       transform: "scale(1.1) translateY(-20px)",
@@ -78,7 +78,6 @@ const AnimatedCards = memo(({ tableId, cards, handleSetBitas }) => {
       suit={cardItem?.suit}
       image={cardItem?.image}
       index={indexItem}
-      onClick={() => handleSetBitas(cardItem, tableId)}
     />
   ));
 });
@@ -88,25 +87,29 @@ AnimatedCards.propTypes = {
   cards: PropTypes.array.isRequired,
   active: PropTypes.object,
   over: PropTypes.string,
-  handleSetBitas: PropTypes.func.isRequired,
 };
 
 // Выносим CardRow как отдельный мемоизированный компонент
 const CardRow = memo(({ startIndex, tables, renderCards }) => (
   <div className="cards-block">
-    {[0, 1, 2].map((index) => {
-      const tableId = `table-${index + startIndex}`;
-      return (
-        <Droppable
-          key={tableId}
-          disabled={tables.find((t) => t.id === tableId)?.cards?.length === 2}
-          id={tableId}
-          style={{ position: "relative" }}
-        >
-          {renderCards(tableId)}
-        </Droppable>
-      );
-    })}
+    {tables
+      ?.filter((_, index) => {
+        if (startIndex === 0) return index <= 2;
+        if (startIndex === 3) return index >= 3;
+      })
+      .map((_, index) => {
+        const tableId = `table-${index + startIndex}`;
+        return (
+          <Droppable
+            key={tableId}
+            disabled={tables.find((t) => t.id === tableId)?.cards?.length === 2}
+            id={tableId}
+            style={{ position: "relative" }}
+          >
+            {renderCards(tableId)}
+          </Droppable>
+        );
+      })}
   </div>
 ));
 
@@ -116,6 +119,7 @@ CardRow.propTypes = {
   startIndex: PropTypes.number.isRequired,
   tables: PropTypes.array.isRequired,
   renderCards: PropTypes.func.isRequired,
+  isAttackState: PropTypes.bool,
 };
 
 const GameDecksComponent = ({
@@ -123,46 +127,43 @@ const GameDecksComponent = ({
   active,
   tables,
   setTables,
-  handleSetBitas,
+  isAttackState,
 }) => {
   // Оптимизируем useEffect
   useEffect(() => {
-    if (!active || !over) return;
+    console.log("====================================");
+    console.log({ active });
+    console.log("====================================");
+    if (!active || !over || !isAttackState) return;
 
     setTables((prev) =>
-      prev.map((table) =>
-        table.id === over
-          ? { ...table, cards: [...table.cards, active] }
-          : table
-      )
+      prev.map((table) => {
+        return table.id === over
+          ? { ...table, cards: [...new Set([...table.cards, active])] }
+          : table;
+      })
     );
-  }, [active, over, setTables]);
+  }, [active, over, setTables, isAttackState]);
 
   // Мемоизируем функцию renderCards
   const renderCards = useCallback(
     (tableId) => {
       const table = tables.find((t) => t.id === tableId);
-      return (
-        <AnimatedCards
-          tableId={tableId}
-          cards={table?.cards || []}
-          handleSetBitas={handleSetBitas}
-        />
-      );
+      return <AnimatedCards tableId={tableId} cards={table?.cards || []} />;
     },
-    [tables, handleSetBitas]
+    [tables]
   );
-
-  // Мемоизируем функцию handleSetBitas
 
   return (
     <Deck>
       <div className="row">
         <CardRow startIndex={0} tables={tables} renderCards={renderCards} />
       </div>
-      <div className="row">
-        <CardRow startIndex={3} tables={tables} renderCards={renderCards} />
-      </div>
+      {tables?.length > 2 ? (
+        <div className="row">
+          <CardRow startIndex={3} tables={tables} renderCards={renderCards} />
+        </div>
+      ) : null}
     </Deck>
   );
 };
@@ -173,7 +174,7 @@ GameDecksComponent.propTypes = {
   setBitas: PropTypes.func,
   tables: PropTypes.array.isRequired,
   setTables: PropTypes.func.isRequired,
-  handleSetBitas: PropTypes.func.isRequired,
+  isAttackState: PropTypes.bool,
 };
 
 export default memo(GameDecksComponent);

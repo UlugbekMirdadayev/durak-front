@@ -2,7 +2,8 @@ import { BackImage, deck } from "../helper/deck";
 import Card from "./Card";
 import styled from "styled-components";
 import sizeCalculator from "../hook/useSizeCalculator";
-import { memo, useState } from "react";
+import { memo, useEffect, useState } from "react";
+import PropTypes from "prop-types";
 
 const Kuzers = styled.div`
   position: absolute;
@@ -67,8 +68,13 @@ const PribambasText = styled.span`
   text-transform: uppercase;
 `;
 
-const KuzersComponent = () => {
+const KuzersComponent = ({ setActiveSuit }) => {
   const [random, setRandom] = useState(Math.floor(Math.random() * 48) + 1);
+
+  useEffect(() => {
+    setActiveSuit(deck[random].suit);
+  }, [random, setActiveSuit]);
+
   return (
     <>
       <Kuzers onClick={() => setRandom(Math.floor(Math.random() * 48) + 1)}>
@@ -93,6 +99,10 @@ const KuzersComponent = () => {
       </ActiveKuzer>
     </>
   );
+};
+
+KuzersComponent.propTypes = {
+  setActiveSuit: PropTypes.func,
 };
 
 export default memo(KuzersComponent);

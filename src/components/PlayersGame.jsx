@@ -114,14 +114,11 @@ const EmptyUser = styled(Button)`
   justify-content: center;
 `;
 
-const PlayersGame = ({ setUsersDone, usersDone }) => {
+const PlayersGame = ({ usersDone }) => {
   const dispatch = useDispatch();
   const users = [...Array(Math.floor(Math.random() * 5) + 1).keys()];
   return (
-    <PlayersRow
-      $usersCount={users.length}
-      onClick={() => setUsersDone((prev) => !prev)}
-    >
+    <PlayersRow $usersCount={users.length}>
       {users.map((i) => (
         <Player key={i}>
           {!usersDone && i === 0 ? (
@@ -152,7 +149,6 @@ const PlayersGame = ({ setUsersDone, usersDone }) => {
 };
 
 PlayersGame.propTypes = {
-  setUsersDone: PropTypes.func.isRequired,
   usersDone: PropTypes.bool.isRequired,
 };
 

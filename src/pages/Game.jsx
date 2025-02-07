@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useCallback, useState } from "react";
 import styled from "styled-components";
 import sizeCalculator from "../hook/useSizeCalculator";
@@ -93,15 +92,30 @@ const Game = () => {
   const [usersDone, setUsersDone] = useState(false);
   const [over, setOver] = useState(null);
   const [active, setActive] = useState(null);
+  const [activeSuit, setActiveSuit] = useState(null); // ♣, ♠, ♥, ♦
   const [bitas, setBitas] = useState([]);
+  const [isAttackState, setIsAttackState] = useState(true);
   const [tables, setTables] = useState(
-    Array.from({ length: 6 }, (_, index) => ({
+    Array.from({ length: 1 }, (_, index) => ({
       id: `table-${index}`,
       cards: [],
     }))
   );
 
   const handleSetBitas = useCallback((card, tableId) => {
+    if (!card && !tableId)
+      return setTables((prev) => {
+        const newBitas = prev.reduce((acc, table) => {
+          acc.push(...table.cards);
+          return acc;
+        }, []);
+        setBitas((bitas) => [...new Set([...bitas, ...newBitas])]);
+        return Array.from({ length: 1 }, (_, index) => ({
+          id: `table-${index}`,
+          cards: [],
+        }));
+      });
+
     setTables((prev) => {
       const newBitas = prev.find((table) => table.id === tableId).cards;
       setBitas((oldBitas) => [...oldBitas, ...newBitas]);
@@ -117,33 +131,73 @@ const Game = () => {
   }, []);
 
   function handleDragEnd({ over, active }) {
-    // console.log(over?.id, active?.id);
-    setOver(over?.id);
-    setActive(JSON.parse(active?.id));
+    if (isAttackState) {
+      // consisAttackStateole.log(over?.id, active?.id);
+      setOver(over?.id);
+      setActive(JSON.parse(active?.id));
+    } else {
+      setOver(null);
+      setActive(null);
+    }
   }
 
+  const handleAttack = (tableCard, handCard, kozirSuit) => {
+    // Если на столе нет карты, разрешаем ходить любой
+    if (!tableCard) return true;
+
+    const figures = ["10", "J", "Q", "K", "A"];
+    const isHandKozir = handCard.suit === kozirSuit;
+    const isTableKozir = tableCard.suit === kozirSuit;
+
+    // Если карты одной масти
+    if (tableCard.suit === handCard.suit) {
+      // Для фигур
+      if (figures.includes(tableCard.rank) && figures.includes(handCard.rank)) {
+        return figures.indexOf(handCard.rank) > figures.indexOf(tableCard.rank);
+      } else if (figures.includes(tableCard.rank)) {
+        return false;
+      } else if (figures.includes(handCard.rank)) {
+        return true;
+      }
+      // Для обычных карт
+      return +handCard.rank > +tableCard.rank;
+    }
+
+    // Если бьём козырем не козырную карту
+    if (isHandKozir && !isTableKozir) {
+      return true;
+    }
+
+    return false;
+  };
+
   function handleDragMove({ over, active }) {
-    // console.log(over?.id, JSON.parse(active?.id));
+    const isTable = tables.find((table) => table.id === over?.id);
+    const isAttack = over?.id
+      ? handleAttack(isTable?.cards[0], JSON.parse(active?.id), activeSuit)
+      : false;
+    setOver(null);
+    setActive(null);
+    // console.log({ isAttack, over, active });
+
+    setIsAttackState(isAttack);
   }
 
   return (
     <GameWindow>
       <BackIcon onClick={() => dispatch(setExitVisible(true))} />
       <IconGiveUp onClick={() => dispatch(setGiveUpModal(true))} />
-      <PlayersGame setUsersDone={setUsersDone} usersDone={usersDone} />
+      <PlayersGame usersDone={usersDone} />
 
-      {usersDone ? (
-        <>
-          <KuzersComponent />
-          <DepositGameComponent />
-        </>
-      ) : (
+      {usersDone ? null : (
         <>
           <ShareButton onClick={() => dispatch(setShareModal(true))}>
             <ShareInner>Пригласить друга</ShareInner>
           </ShareButton>
         </>
       )}
+      <KuzersComponent setActiveSuit={setActiveSuit} />
+      <DepositGameComponent />
       <BitasComponent bitas={bitas} />
       <DndContext onDragEnd={handleDragEnd} onDragMove={handleDragMove}>
         <GameDecksComponent
@@ -152,14 +206,23 @@ const Game = () => {
           tables={tables}
           setTables={setTables}
           handleSetBitas={handleSetBitas}
+          isAttackState={isAttackState}
         />
-        <MyCartsComponent over={over} active={active} />
+        <MyCartsComponent
+          over={over}
+          active={active}
+          isAttackState={isAttackState}
+        />
       </DndContext>
 
       <BottomBar
         Button={ShareButton}
         ButtonInner={ShareInner}
         dispatch={dispatch}
+        setUsersDone={setUsersDone}
+        usersDone={usersDone}
+        bitas={bitas}
+        handleSetBitas={handleSetBitas}
       />
     </GameWindow>
   );
