@@ -59,35 +59,42 @@ const MyCartsComponent = ({ over, active }) => {
 
   return (
     <MyCarts>
-      {cards.map((card, index) => (
-        <Draggable
-          key={card.rank + card.suit}
-          id={JSON.stringify({
-            rank: card.rank,
-            suit: card.suit,
-            image: card.image,
-            index: index,
-          })}
-          style={{
-            ...calculateCardStyle(index, cards.length),
-            minWidth: "32vw", // Kartaning kengligi
-            minHeight: "44.8vw", // Kartaning balandligi
-            position: "absolute",
-          }}
-        >
-          <Card
-            rank={card.rank}
-            suit={card.suit}
-            image={card.image}
-            index={index}
-            mycart
+      {cards
+        ?.sort((a, b) => {
+          const aIndex = `${a.suit}-${a.rank}`;
+          const bIndex = `${b.suit}-${b.rank}`;
+          return aIndex.localeCompare(bIndex);
+        })
+
+        ?.map((card, index) => (
+          <Draggable
+            key={card.rank + card.suit}
+            id={JSON.stringify({
+              rank: card.rank,
+              suit: card.suit,
+              image: card.image,
+              index: index,
+            })}
             style={{
+              ...calculateCardStyle(index, cards.length),
               minWidth: "32vw", // Kartaning kengligi
               minHeight: "44.8vw", // Kartaning balandligi
+              position: "absolute",
             }}
-          />
-        </Draggable>
-      ))}
+          >
+            <Card
+              rank={card.rank}
+              suit={card.suit}
+              image={card.image}
+              index={index}
+              mycart
+              style={{
+                minWidth: "32vw", // Kartaning kengligi
+                minHeight: "44.8vw", // Kartaning balandligi
+              }}
+            />
+          </Draggable>
+        ))}
     </MyCarts>
   );
 };
