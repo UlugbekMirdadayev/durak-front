@@ -3,7 +3,8 @@ import sizeCalculator from "../hook/useSizeCalculator";
 import { setAvatarModal } from "../redux/profileSlice";
 import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
-
+import { request } from "../service/api";
+import { toast } from "react-toastify";
 const BottomBarStyle = styled.div`
   position: absolute;
   bottom: 0;
@@ -45,7 +46,6 @@ const Box = styled.div`
     font-size: ${sizeCalculator(17)};
     font-weight: 400;
     position: relative;
-    top: ${sizeCalculator(-3)};
     text-transform: uppercase;
   }
 `;
@@ -104,6 +104,30 @@ const AvatarMe = styled.img`
 const BottomBar = ({ Button, ButtonInner, dispatch, handleSetBitas }) => {
   const user = useSelector(({ user }) => user);
   const game = useSelector(({ exitgame }) => exitgame?.game);
+  const handleReady = () => {
+    const toastId = toast.loading("Пожалуйста, подождите...");
+    request
+      .post("api/game/player/ready", {
+        game_id: game?.id,
+      })
+      .then(({ data }) => {
+        toast.update(toastId, {
+          render: data?.message || "Успешно",
+          type: "success",
+          isLoading: false,
+          autoClose: 1000,
+        });
+      })
+      .catch((err) => {
+        toast.update(toastId, {
+          render: err?.response?.data?.message || "Ошибка",
+          type: "error",
+          isLoading: false,
+          autoClose: 1000,
+        });
+      });
+  };
+
   return (
     <BottomBarStyle>
       <Button
@@ -198,8 +222,7 @@ const BottomBar = ({ Button, ButtonInner, dispatch, handleSetBitas }) => {
           transform: "none",
           width: sizeCalculator(133),
         }}
-        disabled={game?.status === "waiting"}
-        onClick={handleSetBitas}
+        onClick={game?.status === "waiting" ? handleReady : handleSetBitas}
       >
         <ButtonInner>
           {game?.status === "waiting" ? "Готов" : "Бита"}

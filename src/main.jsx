@@ -25,6 +25,9 @@ createRoot(document.getElementById("root")).render(
           pauseOnHover
           theme="colored"
           style={{ zIndex: 10000 }}
+          toastStyle={{
+            scale: "0.8",
+          }}
         />
         <App />
       </Provider>

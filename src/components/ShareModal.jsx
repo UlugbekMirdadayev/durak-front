@@ -3,6 +3,8 @@ import sizeCalculator from "../hook/useSizeCalculator";
 import { useState, useRef, useCallback, useEffect } from "react";
 import { setShareModal } from "../redux/profileSlice";
 import { useDispatch, useSelector } from "react-redux";
+import { request } from "../service/api";
+import { toast } from "react-toastify";
 
 const Container = styled.div`
   position: fixed;
@@ -163,7 +165,8 @@ const ShareModal = () => {
         window.innerHeight - newHeight >
           (window?.Telegram?.WebApp?.contentSafeAreaInset?.top || 50)
           ? newHeight
-          : newHeight - (window?.Telegram?.WebApp?.contentSafeAreaInset?.top || 50)
+          : newHeight -
+              (window?.Telegram?.WebApp?.contentSafeAreaInset?.top || 50)
       );
     },
     [dispatch]
@@ -204,6 +207,42 @@ const ShareModal = () => {
     }
   }, [visible]);
 
+  const token = useSelector((state) => state?.user?.token);
+  const game = useSelector((state) => state?.exitgame?.game);
+
+  const handleInvite = (user_id) => {
+    const toastId = toast.loading("Пожалуйста, подождите...");
+    request
+      .post(
+        "/api/game/player/invite",
+        {
+          user_id,
+          game_id: game?.id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+      .then(({ data }) => {
+        toast.update(toastId, {
+          render: data?.message || "Успешно",
+          type: "success",
+          isLoading: false,
+          autoClose: 1000,
+        });
+      })
+      .catch((err) => {
+        toast.update(toastId, {
+          render: err?.response?.data?.message || "Ошибка",
+          type: "error",
+          isLoading: false,
+          autoClose: 1000,
+        });
+      });
+  };
+
   return (
     <Container $visible={visible}>
       <Overlay onMouseDown={onMouseDown} onTouchStart={onMouseDown} />
@@ -225,7 +264,12 @@ const ShareModal = () => {
               </h1>
               <p>ID: 1234567890</p>
             </div>
-            <button className="primary-btn-outline">Пригласить</button>
+            <button
+              className="primary-btn-outline"
+              onClick={() => handleInvite(i)}
+            >
+              Пригласить
+            </button>
           </UserInformation>
         ))}
         <Button onClick={() => dispatch(setShareModal(false))}>

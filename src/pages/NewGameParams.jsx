@@ -321,7 +321,7 @@ const NewGameParams = () => {
 
             <input
               type="range"
-              min={10}
+              min={5}
               step={1}
               max={100}
               value={formData.bid_amount}
