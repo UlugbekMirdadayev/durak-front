@@ -137,11 +137,16 @@ const Game = () => {
     });
   }, []);
 
-  function handleDragEnd({ over, active, delta }) {
-    if (Math.abs(delta.y) > 50) {
-      setActive(JSON.parse(active?.id));
-      setOver(`table-0`);
-    } else if (isAttackState) {
+  function handleDragEnd({
+    over,
+    active,
+    // , delta
+  }) {
+    // if (Math.abs(delta.y) > 50) {
+    //   setActive(JSON.parse(active?.id));
+    //   setOver(`table-0`);
+    // } else
+    if (isAttackState) {
       setOver(over?.id);
       setActive(JSON.parse(active?.id));
     } else {
@@ -180,10 +185,10 @@ const Game = () => {
     return false;
   };
 
-  function handleDragMove({ over, active, delta }) {
-    if (Math.abs(delta.y) > 50) {
-      over = { id: `table-0` };
-    }
+  function handleDragMove({ over, active }) {
+    // if (Math.abs(delta.y) > 50) {
+    //   over = { id: `table-0` };
+    // }
     const isTable = tables.find((table) => table.id === over?.id);
     const isAttack = over?.id
       ? handleAttack(isTable?.cards[0], JSON.parse(active?.id), activeSuit)

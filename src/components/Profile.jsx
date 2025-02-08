@@ -430,24 +430,26 @@ const Complain = styled.div`
 
 const ProfileModal = () => {
   const user = useSelector((state) => state?.user);
+  const dispatch = useDispatch();
+  const { opened, profile } = useSelector(({ profile }) => profile);
   const list = [
     {
       label: "Максимальный выигрыш",
-      value: "" + user?.max_win_amount,
+      value: "" + (profile?.max_win_amount || user?.max_win_amount),
     },
 
     {
       label: "Последний выигрыш",
-      value: "" + user?.last_win_amount,
+      value: "" + (profile?.last_win_amount || user?.last_win_amount),
     },
     {
       label: "Всего игр",
-      value: user?.all_games_count,
+      value: profile?.all_games_count || user?.all_games_count,
     },
 
     {
       label: "Всего побед",
-      value: user?.all_games_win_count,
+      value: profile?.all_games_win_count || user?.all_games_win_count,
     },
     {
       label: "Найти друга",
@@ -466,8 +468,7 @@ const ProfileModal = () => {
       page: "statistics",
     },
   ];
-  const dispatch = useDispatch();
-  const { opened, profile } = useSelector(({ profile }) => profile);
+
   const [height, setHeight] = useState(
     window.innerHeight * 0.9 -
       (window?.Telegram?.WebApp?.contentSafeAreaInset?.top || 60)
@@ -546,22 +547,26 @@ const ProfileModal = () => {
       <Body ref={bodyRef} style={{ height: sizeCalculator(height) }}>
         <Profile $visible={activeProfile === "all"}>
           <UserInformation>
-            <img src={user?.user_photo} alt="Avatar" loading="lazy" />
+            <img
+              src={profile?.user_photo || user?.user_photo}
+              alt="Avatar"
+              loading="lazy"
+            />
 
             <div className="info">
               <h1
                 onClick={() => {
-                  if (profile?.name) return;
+                  if (profile?.id) return;
                   setActiveProfile("profil-name");
                   setHeight(220);
                 }}
-                className={profile?.name ? "disabled" : undefined}
+                className={profile?.id ? "disabled" : undefined}
               >
-                <span>{user?.first_name}</span>
-                {profile?.name ? null : <PenIcon />}
+                <span>{profile?.first_name || user?.first_name}</span>
+                {profile?.id ? null : <PenIcon />}
               </h1>
               {/* {profile?.name ? null : <p>{user?.all_games_count} / 1000 000</p>} */}
-              <p>ID: {user?.id}</p>
+              <p>ID: {profile?.id || user?.id}</p>
             </div>
 
             {profile?.name ? (
@@ -581,7 +586,7 @@ const ProfileModal = () => {
                 </div>
               ))}
             <Hr />
-            {profile?.name ? (
+            {profile?.id ? (
               <>
                 <div
                   className="list button"
@@ -629,7 +634,17 @@ const ProfileModal = () => {
                   </div>
                   <ArrowIcon />
                 </div>
-                <div className="list button" onClick={() => setBlock(!block)}>
+                <div
+                  className="list button"
+                  onClick={() => {
+                    if (!block) {
+                      confirm("Вы хотите заблокировать пользователя?") &&
+                        setBlock(true);
+                    } else {
+                      setBlock(false);
+                    }
+                  }}
+                >
                   <div className="left">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

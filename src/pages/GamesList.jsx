@@ -177,13 +177,16 @@ const GamesList = () => {
   }, [token]);
 
   const handleJoinGame = useCallback(
-    (id) => {
+    (game) => {
+      dispatch(setGame(game));
+
+      navigate("/game");
       const toastId = toast.loading("Присоединение к игре...");
       request
         .post(
           "api/game/player/join",
           {
-            game_id: id,
+            game_id: game?.id,
           },
           {
             headers: {
@@ -199,7 +202,7 @@ const GamesList = () => {
             autoClose: 2000,
           });
 
-          dispatch(setGame({ id }));
+          dispatch(setGame(game));
 
           navigate("/game");
         })
@@ -276,11 +279,8 @@ const GamesList = () => {
           ) : (
             gamesList
               ?.filter((item) => item.is_creator_friend)
-              .map((item, index) => (
-                <Card
-                  key={item?.id + index}
-                  onClick={() => handleJoinGame(item?.id || index + 1)}
-                >
+              .map((item) => (
+                <Card key={item?.id} onClick={() => handleJoinGame(item)}>
                   <Row>
                     <Row>
                       <button>
@@ -317,7 +317,7 @@ const GamesList = () => {
 
           <CardTitle>Глобальный поиск</CardTitle>
           {gamesList?.map((item) => (
-            <Card key={item?.id} onClick={() => handleJoinGame(item?.id)}>
+            <Card key={item?.id} onClick={() => handleJoinGame(item)}>
               <Row>
                 <Row>
                   <button>

@@ -110,6 +110,7 @@ const BottomBar = ({
   handleSetBitas,
 }) => {
   const user = useSelector(({ user }) => user);
+  const game = useSelector(({ exitgame }) => exitgame?.game);
   return (
     <BottomBarStyle>
       <Button
@@ -122,7 +123,7 @@ const BottomBar = ({
         }}
       >
         <Box>
-          <span>36</span>
+          <span>{game?.cards_count}</span>
         </Box>
         <Box>
           <svg

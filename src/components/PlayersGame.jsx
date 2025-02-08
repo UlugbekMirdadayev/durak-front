@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { setProfile, setProfileOpened } from "../redux/profileSlice";
 import sizeCalculator from "../hook/useSizeCalculator";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { memo } from "react";
 import PropTypes from "prop-types";
 
@@ -114,32 +114,37 @@ const EmptyUser = styled(Button)`
   justify-content: center;
 `;
 
-const PlayersGame = ({ usersDone }) => {
+const PlayersGame = () => {
+  const players = useSelector(({ exitgame }) => exitgame?.game?.players);
   const dispatch = useDispatch();
-  const users = [...Array(Math.floor(Math.random() * 5) + 1).keys()];
+  const users = [...Array(players?.players_count).keys()];
+  const isUser = (position) =>
+    players?.find((player) => player?.position === position);
   return (
-    <PlayersRow $usersCount={users.length}>
-      {users.map((i) => (
-        <Player key={i}>
-          {!usersDone && i === 0 ? (
+    <PlayersRow $usersCount={players?.length}>
+      {users?.map((userIndex) => (
+        <Player key={isUser(userIndex + 1)?.id}>
+          {!isUser(userIndex + 1) ? (
             <EmptyUser>Пусто</EmptyUser>
           ) : (
             <>
-              <div className="badge">{Math.floor(Math.random() * 1000)}</div>
+              <div className="badge">
+                {isUser(userIndex + 1)?.user?.all_games_count}
+              </div>
               <Avatar
-                src={`https://avatars.githubusercontent.com/u/${Math.floor(
-                  Math.random() * 10000
-                )}`}
+                src={isUser(userIndex + 1)?.user?.user_photo}
                 onClick={() => {
                   dispatch(setProfileOpened(true));
-                  dispatch(setProfile({ name: "Ekaterina" }));
+                  dispatch(setProfile(isUser(userIndex + 1)?.user));
                 }}
               />
 
-              <span>Ekaterin...</span>
-              <Button>
-                <StatusDone>Готов</StatusDone>
-              </Button>
+              <span>{isUser(userIndex + 1)?.user?.first_name}</span>
+              {isUser(userIndex + 1)?.is_ready ? (
+                <Button>
+                  <StatusDone>Готов</StatusDone>
+                </Button>
+              ) : null}
             </>
           )}
         </Player>
