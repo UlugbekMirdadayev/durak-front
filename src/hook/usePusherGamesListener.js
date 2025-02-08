@@ -85,7 +85,7 @@ const usePusherGamesListener = () => {
       }
     });
 
-    gameStatusChannel.bind("game.state.updated", (data) => {
+    gameStatusChannel.bind("game.state.updated", async function (data) {
       console.log("Game status:", data);
       setGameStatus(data);
     });

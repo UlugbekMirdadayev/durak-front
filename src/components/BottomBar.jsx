@@ -185,7 +185,7 @@ const BottomBar = ({
       >
         <AvatarMe src={user?.user_photo} alt="Avatar" loading="lazy" />
 
-        <div className="badge">{user?.all_games_win_count}</div>
+        <div className="badge">{user?.all_games_count}</div>
         <span
           className="rubik"
           style={{

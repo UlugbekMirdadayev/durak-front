@@ -105,7 +105,9 @@ const Header = () => {
       >
         <Avatar
           src={
-            user?.user_photo || "https://placehold.co/60x50?text=Change+Pass"
+            window.Telegram?.WebApp?.initDataUnsafe?.user?.photo_url ||
+            user?.user_photo ||
+            "https://placehold.co/60x50?text=Change+Pass"
           }
           alt="Avatar"
           loading="lazy"

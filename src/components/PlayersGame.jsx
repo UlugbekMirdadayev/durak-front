@@ -115,32 +115,35 @@ const EmptyUser = styled(Button)`
 `;
 
 const PlayersGame = () => {
-  const players = useSelector(({ exitgame }) => exitgame?.game?.players);
+  const { players, players_count } = useSelector(
+    ({ exitgame }) => exitgame?.game
+  );
   const dispatch = useDispatch();
-  const users = [...Array(players?.players_count).keys()];
+  const users = Array.from({ length: players_count }, (_, i) => i + 1);
   const isUser = (position) =>
     players?.find((player) => player?.position === position);
+
   return (
     <PlayersRow $usersCount={players?.length}>
       {users?.map((userIndex) => (
-        <Player key={isUser(userIndex + 1)?.id}>
-          {!isUser(userIndex + 1) ? (
+        <Player key={isUser(userIndex)?.id}>
+          {!isUser(userIndex) ? (
             <EmptyUser>Пусто</EmptyUser>
           ) : (
             <>
               <div className="badge">
-                {isUser(userIndex + 1)?.user?.all_games_count}
+                {isUser(userIndex)?.user?.all_games_count}
               </div>
               <Avatar
-                src={isUser(userIndex + 1)?.user?.user_photo}
+                src={isUser(userIndex)?.user?.user_photo}
                 onClick={() => {
                   dispatch(setProfileOpened(true));
-                  dispatch(setProfile(isUser(userIndex + 1)?.user));
+                  dispatch(setProfile(isUser(userIndex)?.user));
                 }}
               />
 
-              <span>{isUser(userIndex + 1)?.user?.first_name}</span>
-              {isUser(userIndex + 1)?.is_ready ? (
+              <span>{isUser(userIndex)?.user?.first_name}</span>
+              {isUser(userIndex)?.is_ready ? (
                 <Button>
                   <StatusDone>Готов</StatusDone>
                 </Button>
