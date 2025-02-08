@@ -1,7 +1,8 @@
+import { memo } from "react";
 import styled from "styled-components";
+import { useSelector } from "react-redux";
 import sizeCalculator from "../hook/useSizeCalculator";
 import dollar from "../assets/images/dollar.png";
-import { memo, useState } from "react";
 
 const PribambasText = styled.span`
   color: #fff;
@@ -42,13 +43,11 @@ const DepositRow = styled.div`
 `;
 
 const DepositGameComponent = () => {
-  const [random, setRandom] = useState(Math.floor(Math.random() * 1000) + 100);
+  const { game } = useSelector(({ exitgame }) => exitgame);
   return (
-    <DepositRow
-      onClick={() => setRandom(Math.floor(Math.random() * 1000) + 100)}
-    >
+    <DepositRow>
       <img src={dollar} alt="deposits" />
-      <PribambasText>{random}</PribambasText>
+      <PribambasText>{game?.bid_amount}</PribambasText>
     </DepositRow>
   );
 };

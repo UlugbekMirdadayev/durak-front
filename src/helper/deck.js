@@ -52,270 +52,272 @@ import SQImage from "../assets/cards/QS.svg";
 import SKImage from "../assets/cards/KS.svg";
 import BackImage from "../assets/cards/back.svg";
 
+// clubs, hearts, diamonds, spades
 const deck = [
   {
-    suit: "♣",
+    suit: "clubs", // clubs
     rank: "A",
     image: ACImage,
   },
+
   {
-    suit: "♣",
+    suit: "clubs", // clubs
     rank: "2",
     image: C2Image,
   },
   {
-    suit: "♣",
+    suit: "clubs",
     rank: "3",
     image: C3Image,
   },
   {
-    suit: "♣",
+    suit: "clubs",
     rank: "4",
     image: C4Image,
   },
   {
-    suit: "♣",
+    suit: "clubs",
     rank: "5",
     image: C5Image,
   },
   {
-    suit: "♣",
+    suit: "clubs",
     rank: "6",
     image: C6Image,
   },
   {
-    suit: "♣",
+    suit: "clubs",
     rank: "7",
     image: C7Image,
   },
   {
-    suit: "♣",
+    suit: "clubs",
     rank: "8",
     image: C8Image,
   },
   {
-    suit: "♣",
+    suit: "clubs",
     rank: "9",
     image: C9Image,
   },
   {
-    suit: "♣",
+    suit: "clubs",
     rank: "10",
     image: C10Image,
   },
   {
-    suit: "♣",
+    suit: "clubs",
     rank: "J",
     image: CJImage,
   },
   {
-    suit: "♣",
+    suit: "clubs",
     rank: "Q",
     image: CQImage,
   },
   {
-    suit: "♣",
+    suit: "clubs",
     rank: "K",
     image: CKImage,
   },
   // clubs cards end
   // hearts cards start
   {
-    suit: "♡",
+    suit: "hearts",
     rank: "A",
     image: AHimage,
   },
   {
-    suit: "♡",
+    suit: "hearts",
     rank: "2",
     image: H2Image,
   },
   {
-    suit: "♡",
+    suit: "hearts",
     rank: "3",
     image: H3Image,
   },
   {
-    suit: "♡",
+    suit: "hearts",
     rank: "4",
     image: H4Image,
   },
   {
-    suit: "♡",
+    suit: "hearts",
     rank: "5",
     image: H5Image,
   },
   {
-    suit: "♡",
+    suit: "hearts",
     rank: "6",
     image: H6Image,
   },
   {
-    suit: "♡",
+    suit: "hearts",
     rank: "7",
     image: H7Image,
   },
   {
-    suit: "♡",
+    suit: "hearts",
     rank: "8",
     image: H8Image,
   },
   {
-    suit: "♡",
+    suit: "hearts",
     rank: "9",
     image: H9Image,
   },
   {
-    suit: "♡",
+    suit: "hearts",
     rank: "10",
     image: H10Image,
   },
   {
-    suit: "♡",
+    suit: "hearts",
     rank: "J",
     image: HJImage,
   },
   {
-    suit: "♡",
+    suit: "hearts",
     rank: "Q",
     image: HQImage,
   },
   {
-    suit: "♡",
+    suit: "hearts",
     rank: "K",
     image: HKImage,
   },
   // hearts cards end
   // diamonds cards start
   {
-    suit: "♢",
+    suit: "diamonds",
     rank: "A",
     image: ADImage,
   },
   {
-    suit: "♢",
+    suit: "diamonds",
     rank: "2",
     image: D2Image,
   },
   {
-    suit: "♢",
+    suit: "diamonds",
     rank: "3",
     image: D3Image,
   },
   {
-    suit: "♢",
+    suit: "diamonds",
     rank: "4",
     image: D4Image,
   },
   {
-    suit: "♢",
+    suit: "diamonds",
     rank: "5",
     image: D5Image,
   },
   {
-    suit: "♢",
+    suit: "diamonds",
     rank: "6",
     image: D6Image,
   },
   {
-    suit: "♢",
+    suit: "diamonds",
     rank: "7",
     image: D7Image,
   },
   {
-    suit: "♢",
+    suit: "diamonds",
     rank: "8",
     image: D8Image,
   },
   {
-    suit: "♢",
+    suit: "diamonds",
     rank: "9",
     image: D9Image,
   },
   {
-    suit: "♢",
+    suit: "diamonds",
     rank: "10",
     image: D10Image,
   },
   {
-    suit: "♢",
+    suit: "diamonds",
     rank: "J",
     image: DJImage,
   },
   {
-    suit: "♢",
+    suit: "diamonds",
     rank: "Q",
     image: DQImage,
   },
   {
-    suit: "♢",
+    suit: "diamonds",
     rank: "K",
     image: DKImage,
   },
   // diamonds cards end
   // clubs cards start
   {
-    suit: "♠",
+    suit: "spades",
     rank: "A",
     image: ASImage,
   },
   {
-    suit: "♠",
+    suit: "spades",
     rank: "2",
     image: S2Image,
   },
   {
-    suit: "♠",
+    suit: "spades",
     rank: "3",
     image: S3Image,
   },
   {
-    suit: "♠",
+    suit: "spades",
     rank: "4",
     image: S4Image,
   },
   {
-    suit: "♠",
+    suit: "spades",
     rank: "5",
     image: S5Image,
   },
   {
-    suit: "♠",
+    suit: "spades",
     rank: "6",
     image: S6Image,
   },
   {
-    suit: "♠",
+    suit: "spades",
     rank: "7",
     image: S7Image,
   },
   {
-    suit: "♠",
+    suit: "spades",
     rank: "8",
     image: S8Image,
   },
   {
-    suit: "♠",
+    suit: "spades",
     rank: "9",
     image: S9Image,
   },
   {
-    suit: "♠",
+    suit: "spades",
     rank: "10",
     image: S10Image,
   },
   {
-    suit: "♠",
+    suit: "spades",
     rank: "J",
     image: SJImage,
   },
   {
-    suit: "♠",
+    suit: "spades",
     rank: "Q",
     image: SQImage,
   },
   {
-    suit: "♠",
+    suit: "spades",
     rank: "K",
     image: SKImage,
   },

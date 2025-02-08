@@ -4,9 +4,18 @@ import styled from "styled-components";
 import sizeCalculator from "../hook/useSizeCalculator";
 import { memo, useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import { useSelector } from "react-redux";
+
+const icons = {
+  clubs: <pre>♣</pre>,
+  hearts: <pre style={{ color: "red" }}>♥</pre>,
+  diamonds: <pre style={{ color: "red" }}>♦</pre>,
+  spades: <pre>♠</pre>,
+};
 
 const Kuzers = styled.div`
   position: absolute;
+
   top: 50%;
   left: 0;
   transform: translateY(-50%);
@@ -55,6 +64,11 @@ const ActiveKuzer = styled.div`
     bottom: 100%;
     right: 0;
   }
+  pre {
+    font-size: ${sizeCalculator(40)};
+    text-transform: uppercase;
+    text-shadow: 0 0 ${sizeCalculator(2)} #fff;
+  }
 `;
 
 const PribambasText = styled.span`
@@ -70,7 +84,7 @@ const PribambasText = styled.span`
 
 const KuzersComponent = ({ setActiveSuit }) => {
   const [random, setRandom] = useState(Math.floor(Math.random() * 48) + 1);
-
+  const game = useSelector(({ exitgame }) => exitgame?.game);
   useEffect(() => {
     setActiveSuit(deck[random].suit);
   }, [random, setActiveSuit]);
@@ -79,23 +93,37 @@ const KuzersComponent = ({ setActiveSuit }) => {
     <>
       <Kuzers onClick={() => setRandom(Math.floor(Math.random() * 48) + 1)}>
         <div className="cards">
-          {deck
-            ?.filter((_, index) => index <= random)
-            .map((card, index) => (
-              <Card
-                key={index}
-                rank={card.rank}
-                suit={card.suit}
-                image={BackImage}
-                index={index}
-                kuzer
-              />
-            ))}
+          {Array.from({ length: game?.remaining_cards_count }, (_, index) => (
+            <Card
+              key={index}
+              rank={deck[index].rank}
+              suit={deck[index].suit}
+              image={BackImage}
+              index={index}
+              kuzer
+            />
+          ))}
         </div>
       </Kuzers>
       <ActiveKuzer>
-        <PribambasText>{random}</PribambasText>
-        <Card image={deck[random].image} />
+        {game?.remaining_cards_count ? (
+          <>
+            <PribambasText>{game?.remaining_cards_count}</PribambasText>
+            <Card
+              image={
+                deck?.filter((card) => card.suit === game?.trump_suit)[
+                  Math.floor(
+                    Math.random() *
+                      deck?.filter((card) => card.suit === game?.trump_suit)
+                        .length
+                  )
+                ].image
+              }
+            />
+          </>
+        ) : (
+          icons[game?.trump_suit]
+        )}
       </ActiveKuzer>
     </>
   );
