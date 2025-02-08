@@ -127,15 +127,20 @@ const PlayersGame = () => {
     <PlayersRow $usersCount={players?.length}>
       {users?.map((userIndex) => (
         <Player key={isUser(userIndex)?.id}>
-          {!isUser(userIndex) ? (
+          {!isUser(userIndex)?.user ? (
             <EmptyUser>Пусто</EmptyUser>
           ) : (
             <>
-              <div className="badge">
-                {isUser(userIndex)?.user?.all_games_count}
-              </div>
+              {isUser(userIndex)?.user?.all_games_count ? (
+                <div className="badge">
+                  {isUser(userIndex)?.user?.all_games_count}
+                </div>
+              ) : null}
               <Avatar
-                src={isUser(userIndex)?.user?.user_photo}
+                src={
+                  isUser(userIndex)?.user?.user_photo ||
+                  "https://placehold.co/60x50?text=Gamer"
+                }
                 onClick={() => {
                   dispatch(setProfileOpened(true));
                   dispatch(setProfile(isUser(userIndex)?.user));
