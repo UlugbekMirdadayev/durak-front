@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import sizeCalculator from "../hook/useSizeCalculator";
 import back from "../assets/images/game-back.png";
-import { useDispatch } from "react-redux";
-import { setExitVisible } from "../redux/exitSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { setBitaCount, setExitVisible } from "../redux/exitSlice";
 import { setGiveUpModal, setShareModal } from "../redux/profileSlice";
 import { GiveUpIcon } from "../assets/images/svgs";
 import BottomBar from "../components/BottomBar";
 import PlayersGame from "../components/PlayersGame";
 import BitasComponent from "../components/BitasComponent";
-import GameDecksComponent from "../components/GameDecksComponent";
+import TableComponent from "../components/TableComponent";
 import KuzersComponent from "../components/KuzersComponent";
 import DepositGameComponent from "../components/DepositGameComponent";
 import MyCartsComponent from "../components/MyCartsComponent";
@@ -90,42 +90,48 @@ const IconGiveUp = styled(GiveUpIcon)`
 
 const Game = () => {
   const dispatch = useDispatch();
-  const [usersDone, setUsersDone] = useState(false);
   const [over, setOver] = useState(null);
   const [active, setActive] = useState(null);
   const [activeSuit, setActiveSuit] = useState(null); // ♣, ♠, ♥, ♦
   const [bitas, setBitas] = useState([]);
   const [isAttackState, setIsAttackState] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
   const [tables, setTables] = useState(
     Array.from({ length: 1 }, (_, index) => ({
       id: `table-${index}`,
       cards: [],
     }))
   );
-
   const { gameStatus } = usePusherGamesListener();
 
   useEffect(() => {
-    gameStatus;
+    if (gameStatus) {
+      // Здесь можно добавить логику обработки gameStatus
+    }
   }, [gameStatus]);
 
-  const handleSetBitas = useCallback((card, tableId) => {
-    if (!card && !tableId)
+  const handleSetBitas = (card, tableId) => {
+    if (!card && !tableId) {
       return setTables((prev) => {
         const newBitas = prev.reduce((acc, table) => {
           acc.push(...table.cards);
           return acc;
         }, []);
-        setBitas((bitas) => [...new Set([...bitas, ...newBitas])]);
+        setBitas((bitas) => {
+          const newAllBitas = [...new Set([...bitas, ...newBitas])];
+          dispatch(setBitaCount(newAllBitas.length));
+          return newAllBitas;
+        });
         return Array.from({ length: 1 }, (_, index) => ({
           id: `table-${index}`,
           cards: [],
         }));
       });
+    }
 
     setTables((prev) => {
       const newBitas = prev.find((table) => table.id === tableId).cards;
-      setBitas((oldBitas) => [...oldBitas, ...newBitas]);
+      setBitas((bitas) => [...bitas, ...newBitas]);
       return prev.map((table) =>
         table.id === tableId
           ? {
@@ -135,7 +141,7 @@ const Game = () => {
           : table
       );
     });
-  }, []);
+  };
 
   function handleDragEnd({
     over,
@@ -153,6 +159,7 @@ const Game = () => {
       setOver(null);
       setActive(null);
     }
+    setIsDragging(false);
   }
 
   const handleAttack = (tableCard, handCard, kozirSuit) => {
@@ -186,9 +193,7 @@ const Game = () => {
   };
 
   function handleDragMove({ over, active }) {
-    // if (Math.abs(delta.y) > 50) {
-    //   over = { id: `table-0` };
-    // }
+    setIsDragging(true);
     const isTable = tables.find((table) => table.id === over?.id);
     const isAttack = over?.id
       ? handleAttack(isTable?.cards[0], JSON.parse(active?.id), activeSuit)
@@ -199,44 +204,52 @@ const Game = () => {
     setIsAttackState(isAttack);
   }
 
+  const game = useSelector(({ exitgame }) => exitgame?.game);
+
   return (
     <GameWindow>
-      <BackIcon onClick={() => dispatch(setExitVisible(true))} />
-      <IconGiveUp onClick={() => dispatch(setGiveUpModal(true))} />
-      <PlayersGame usersDone={usersDone} />
+      {game?.status === "waiting" && (
+        <BackIcon onClick={() => dispatch(setExitVisible(true))} />
+      )}
+      {game?.status === "waiting" ? null : (
+        <IconGiveUp onClick={() => dispatch(setGiveUpModal(true))} />
+      )}
+      <PlayersGame />
 
-      {usersDone ? null : (
+      {game?.status === "waiting" ? (
         <>
           <ShareButton onClick={() => dispatch(setShareModal(true))}>
             <ShareInner>Пригласить друга</ShareInner>
           </ShareButton>
         </>
+      ) : (
+        <>
+          <KuzersComponent setActiveSuit={setActiveSuit} />
+          <DepositGameComponent />
+          <BitasComponent />
+          <DndContext onDragEnd={handleDragEnd} onDragMove={handleDragMove}>
+            <TableComponent
+              over={over}
+              active={active}
+              tables={tables}
+              setTables={setTables}
+              handleSetBitas={handleSetBitas}
+              isAttackState={isAttackState}
+              isDragging={isDragging}
+            />
+            <MyCartsComponent
+              over={over}
+              active={active}
+              isAttackState={isAttackState}
+            />
+          </DndContext>
+        </>
       )}
-      <KuzersComponent setActiveSuit={setActiveSuit} />
-      <DepositGameComponent />
-      <BitasComponent bitas={bitas} />
-      <DndContext onDragEnd={handleDragEnd} onDragMove={handleDragMove}>
-        <GameDecksComponent
-          over={over}
-          active={active}
-          tables={tables}
-          setTables={setTables}
-          handleSetBitas={handleSetBitas}
-          isAttackState={isAttackState}
-        />
-        <MyCartsComponent
-          over={over}
-          active={active}
-          isAttackState={isAttackState}
-        />
-      </DndContext>
 
       <BottomBar
         Button={ShareButton}
         ButtonInner={ShareInner}
         dispatch={dispatch}
-        setUsersDone={setUsersDone}
-        usersDone={usersDone}
         bitas={bitas}
         handleSetBitas={handleSetBitas}
       />

@@ -101,14 +101,7 @@ const AvatarMe = styled.img`
   position: relative;
 `;
 
-const BottomBar = ({
-  Button,
-  ButtonInner,
-  dispatch,
-  setUsersDone,
-  usersDone,
-  handleSetBitas,
-}) => {
+const BottomBar = ({ Button, ButtonInner, dispatch, handleSetBitas }) => {
   const user = useSelector(({ user }) => user);
   const game = useSelector(({ exitgame }) => exitgame?.game);
   return (
@@ -205,15 +198,12 @@ const BottomBar = ({
           transform: "none",
           width: sizeCalculator(133),
         }}
-        onClick={() => {
-          if (usersDone) {
-            handleSetBitas();
-          } else {
-            setUsersDone(true);
-          }
-        }}
+        disabled={game?.status === "waiting"}
+        onClick={handleSetBitas}
       >
-        <ButtonInner>{usersDone ? "Бита" : "Готов"}</ButtonInner>
+        <ButtonInner>
+          {game?.status === "waiting" ? "Готов" : "Бита"}
+        </ButtonInner>
       </Button>
     </BottomBarStyle>
   );
@@ -223,8 +213,6 @@ BottomBar.propTypes = {
   Button: PropTypes.elementType,
   ButtonInner: PropTypes.elementType,
   dispatch: PropTypes.func,
-  setUsersDone: PropTypes.func,
-  usersDone: PropTypes.bool,
   handleSetBitas: PropTypes.func,
 };
 

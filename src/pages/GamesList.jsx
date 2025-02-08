@@ -178,9 +178,6 @@ const GamesList = () => {
 
   const handleJoinGame = useCallback(
     (game) => {
-      dispatch(setGame(game));
-
-      navigate("/game");
       const toastId = toast.loading("Присоединение к игре...");
       request
         .post(

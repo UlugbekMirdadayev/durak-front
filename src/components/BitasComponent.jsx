@@ -3,7 +3,7 @@ import sizeCalculator from "../hook/useSizeCalculator";
 import { BackImage } from "../helper/deck";
 import { useState, memo } from "react";
 import Card from "./Card";
-import PropTypes from "prop-types";
+import { useSelector } from "react-redux";
 
 const Bitas = styled.div`
   position: absolute;
@@ -26,34 +26,35 @@ const Bitas = styled.div`
   }
 `;
 
-const BitasComponent = ({ bitas }) => {
+const BitasComponent = () => {
+  const game = useSelector(({ exitgame }) => exitgame?.game);
+  const bitas = Array.from(
+    { length: game?.beaten_cards_count },
+    (_, index) => index
+  );
   const [updatePosition, setUpdatePosition] = useState(0);
   return (
     <Bitas onClick={() => setUpdatePosition(Math.random() * 1)}>
       <div className="cards">
-        {bitas?.map((card, index) => (
+        {bitas?.map((index) => (
           <Card
             key={index}
-            rank={card.rank}
-            suit={card.suit}
+            rank={"bita"}
+            suit={"bita"}
             image={BackImage}
             style={{
               zIndex: index,
               transform: `rotate(${
-                Math.random() * 15 - 15 + updatePosition
+                Math.random() * 30 - 15 + updatePosition
               }deg) translate(${sizeCalculator(
-                Math.random() * 50 - 5
-              )}, ${sizeCalculator(Math.random() * 100 - 5)})`,
+                Math.random() * 30 - 5
+              )}, ${sizeCalculator(Math.random() * 80 - 5)})`,
             }}
           />
         ))}
       </div>
     </Bitas>
   );
-};
-
-BitasComponent.propTypes = {
-  bitas: PropTypes.array.isRequired,
 };
 
 export default memo(BitasComponent);

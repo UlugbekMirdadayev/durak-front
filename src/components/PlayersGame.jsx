@@ -3,7 +3,6 @@ import { setProfile, setProfileOpened } from "../redux/profileSlice";
 import sizeCalculator from "../hook/useSizeCalculator";
 import { useDispatch, useSelector } from "react-redux";
 import { memo } from "react";
-import PropTypes from "prop-types";
 
 const StatusDone = styled.div`
   color: #fff;
@@ -118,51 +117,50 @@ const PlayersGame = () => {
   const { players, players_count } = useSelector(
     ({ exitgame }) => exitgame?.game
   );
+  const user = useSelector(({ user }) => user);
   const dispatch = useDispatch();
-  const users = Array.from({ length: players_count }, (_, i) => i + 1);
+  const users = Array.from({ length: players_count - 1 }, (_, i) => i + 1);
   const isUser = (position) =>
     players?.find((player) => player?.position === position);
 
   return (
     <PlayersRow $usersCount={players?.length}>
-      {users?.map((userIndex) => (
-        <Player key={isUser(userIndex)?.id}>
-          {!isUser(userIndex)?.user ? (
-            <EmptyUser>Пусто</EmptyUser>
-          ) : (
-            <>
-              {isUser(userIndex)?.user?.all_games_count ? (
-                <div className="badge">
-                  {isUser(userIndex)?.user?.all_games_count}
-                </div>
-              ) : null}
-              <Avatar
-                src={
-                  isUser(userIndex)?.user?.user_photo ||
-                  "https://placehold.co/60x50?text=Gamer"
-                }
-                onClick={() => {
-                  dispatch(setProfileOpened(true));
-                  dispatch(setProfile(isUser(userIndex)?.user));
-                }}
-              />
+      {users
+        ?.filter((userIndex) => isUser(userIndex)?.id !== user?.id)
+        ?.map((userIndex) => (
+          <Player key={userIndex}>
+            {!isUser(userIndex)?.user ? (
+              <EmptyUser>Пусто</EmptyUser>
+            ) : (
+              <>
+                {isUser(userIndex)?.user?.all_games_count ? (
+                  <div className="badge">
+                    {isUser(userIndex)?.user?.all_games_count}
+                  </div>
+                ) : null}
+                <Avatar
+                  src={
+                    isUser(userIndex)?.user?.user_photo ||
+                    "https://placehold.co/60x50?text=Gamer"
+                  }
+                  onClick={() => {
+                    dispatch(setProfileOpened(true));
+                    dispatch(setProfile(isUser(userIndex)?.user));
+                  }}
+                />
 
-              <span>{isUser(userIndex)?.user?.first_name}</span>
-              {isUser(userIndex)?.is_ready ? (
-                <Button>
-                  <StatusDone>Готов</StatusDone>
-                </Button>
-              ) : null}
-            </>
-          )}
-        </Player>
-      ))}
+                <span>{isUser(userIndex)?.user?.first_name}</span>
+                {isUser(userIndex)?.is_ready ? (
+                  <Button>
+                    <StatusDone>Готов</StatusDone>
+                  </Button>
+                ) : null}
+              </>
+            )}
+          </Player>
+        ))}
     </PlayersRow>
   );
-};
-
-PlayersGame.propTypes = {
-  usersDone: PropTypes.bool.isRequired,
 };
 
 export default memo(PlayersGame);

@@ -7,6 +7,7 @@ import FindingOpponent from "./FindingOpponent";
 import bg from "../assets/images/bg-welcome.png";
 import { useDispatch, useSelector } from "react-redux";
 import { setGame } from "../redux/exitSlice";
+import { toast } from "react-toastify";
 
 const Container = styled.div`
   position: fixed;
@@ -238,7 +239,8 @@ const NewGameParams = () => {
     is_for_friends: 0,
   });
   const handleCreateGame = () => {
-    setLoading(true);
+    navigate("/game");
+    const toastId = toast.loading("Пожалуйста, подождите...");
     request
       .post(
         "api/game/create",
@@ -253,14 +255,26 @@ const NewGameParams = () => {
         }
       )
       .then(({ data }) => {
-        console.log({ data });
+        toast.update(toastId, {
+          render: data?.message || "Успешно создано",
+          type: "success",
+          isLoading: false,
+          autoClose: 2000,
+        });
         dispatch(setGame(data?.data));
-        navigate("/game");
       })
 
       .catch((err) => {
+        toast.update(toastId, {
+          render: err?.response?.data?.message || "Ошибка",
+          type: "error",
+          isLoading: false,
+          autoClose: 2000,
+        });
         console.log(err);
+        navigate(-1);
       })
+
       .finally(() => {
         setLoading(false);
       });

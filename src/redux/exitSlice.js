@@ -16,9 +16,12 @@ const exitSlice = createSlice({
       localStorage.setItem("game", JSON.stringify(payload));
       state.game = payload;
     },
+    setBitaCount: (state, { payload }) => {
+      state.game.beaten_cards_count = payload;
+    },
   },
 });
 
-export const { setExitVisible, setGame } = exitSlice.actions;
+export const { setExitVisible, setGame, setBitaCount } = exitSlice.actions;
 
 export default exitSlice.reducer;

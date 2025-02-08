@@ -2,7 +2,7 @@ import { BackImage, deck } from "../helper/deck";
 import Card from "./Card";
 import styled from "styled-components";
 import sizeCalculator from "../hook/useSizeCalculator";
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useSelector } from "react-redux";
 
@@ -68,6 +68,7 @@ const ActiveKuzer = styled.div`
     font-size: ${sizeCalculator(40)};
     text-transform: uppercase;
     text-shadow: 0 0 ${sizeCalculator(2)} #fff;
+    padding: 0 ${sizeCalculator(10)};
   }
 `;
 
@@ -83,15 +84,14 @@ const PribambasText = styled.span`
 `;
 
 const KuzersComponent = ({ setActiveSuit }) => {
-  const [random, setRandom] = useState(Math.floor(Math.random() * 48) + 1);
   const game = useSelector(({ exitgame }) => exitgame?.game);
   useEffect(() => {
-    setActiveSuit(deck[random].suit);
-  }, [random, setActiveSuit]);
+    setActiveSuit(game?.trump_suit);
+  }, [game?.trump_suit, setActiveSuit]);
 
   return (
     <>
-      <Kuzers onClick={() => setRandom(Math.floor(Math.random() * 48) + 1)}>
+      <Kuzers>
         <div className="cards">
           {Array.from({ length: game?.remaining_cards_count }, (_, index) => (
             <Card

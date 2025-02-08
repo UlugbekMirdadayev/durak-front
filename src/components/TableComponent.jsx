@@ -45,10 +45,11 @@ const Deck = styled.div`
 `;
 
 const EmptyCard = styled(EmptyCardIcon)`
-  width: ${sizeCalculator(60)};
-  height: ${sizeCalculator(90)};
+  width: ${sizeCalculator(90)};
+  height: ${sizeCalculator(135)};
   path {
     stroke: var(--color-primary, #d9d9d9);
+    transition: 0.3s;
   }
 `;
 
@@ -90,7 +91,7 @@ AnimatedCards.propTypes = {
 };
 
 // Выносим CardRow как отдельный мемоизированный компонент
-const CardRow = memo(({ startIndex, tables, renderCards }) => (
+const CardRow = memo(({ startIndex, tables, renderCards, isDragging }) => (
   <div className="cards-block">
     {tables
       ?.filter((_, index) => {
@@ -105,6 +106,7 @@ const CardRow = memo(({ startIndex, tables, renderCards }) => (
             disabled={tables.find((t) => t.id === tableId)?.cards?.length === 2}
             id={tableId}
             style={{ position: "relative" }}
+            isDragging={isDragging}
           >
             {renderCards(tableId)}
           </Droppable>
@@ -119,15 +121,16 @@ CardRow.propTypes = {
   startIndex: PropTypes.number.isRequired,
   tables: PropTypes.array.isRequired,
   renderCards: PropTypes.func.isRequired,
-  isAttackState: PropTypes.bool,
+  isDragging: PropTypes.bool,
 };
 
-const GameDecksComponent = ({
+const TableComponent = ({
   over,
   active,
   tables,
   setTables,
   isAttackState,
+  isDragging,
 }) => {
   // Оптимизируем useEffect
   useEffect(() => {
@@ -154,24 +157,35 @@ const GameDecksComponent = ({
   return (
     <Deck>
       <div className="row">
-        <CardRow startIndex={0} tables={tables} renderCards={renderCards} />
+        <CardRow
+          startIndex={0}
+          tables={tables}
+          renderCards={renderCards}
+          isDragging={isDragging}
+        />
       </div>
       {tables?.length > 2 ? (
         <div className="row">
-          <CardRow startIndex={3} tables={tables} renderCards={renderCards} />
+          <CardRow
+            startIndex={3}
+            tables={tables}
+            renderCards={renderCards}
+            isDragging={isDragging}
+          />
         </div>
       ) : null}
     </Deck>
   );
 };
 
-GameDecksComponent.propTypes = {
+TableComponent.propTypes = {
   over: PropTypes.string,
   active: PropTypes.object,
   setBitas: PropTypes.func,
   tables: PropTypes.array.isRequired,
   setTables: PropTypes.func.isRequired,
   isAttackState: PropTypes.bool,
+  isDragging: PropTypes.bool,
 };
 
-export default memo(GameDecksComponent);
+export default memo(TableComponent);
