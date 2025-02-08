@@ -190,6 +190,10 @@ const NewGameParams = () => {
       Math.min(window.innerHeight, startHeightRef.current + diff)
     );
 
+    if (newHeight < 200) {
+      return setHeight(200);
+    }
+
     setHeight(
       window.innerHeight - newHeight >
         (window?.Telegram?.WebApp?.contentSafeAreaInset?.top || 50)
@@ -228,17 +232,20 @@ const NewGameParams = () => {
     }
   }, [step]);
 
-  const [formData, setFormData] = useState({
-    bid_amount: 30,
-    players_count: 2,
-    cards_count: 36,
-    speed: "normal",
-    mode: "podkidnoy",
-    walker: "neighbors",
-    walker_with: "cheat",
-    is_for_friends: 0,
-  });
+  const [formData, setFormData] = useState(
+    JSON.parse(localStorage.getItem("game_params")) || {
+      bid_amount: 30,
+      players_count: 2,
+      cards_count: 36,
+      speed: "normal",
+      mode: "podkidnoy",
+      walker: "neighbors",
+      walker_with: "cheat",
+      is_for_friends: 0,
+    }
+  );
   const handleCreateGame = () => {
+    localStorage.setItem("game_params", JSON.stringify(formData));
     navigate("/game");
     const toastId = toast.loading("Пожалуйста, подождите...");
     request
@@ -359,6 +366,8 @@ const NewGameParams = () => {
                       ...formData,
                       players_count: i,
                       walker: "neighbors",
+                      cards_count:
+                        formData.cards_count === 52 ? 36 : formData.cards_count,
                     });
                   } else {
                     setFormData({ ...formData, players_count: i });
@@ -385,7 +394,16 @@ const NewGameParams = () => {
                   width: "auto",
                   flex: 1,
                 }}
-                onClick={() => setFormData({ ...formData, cards_count: i })}
+                onClick={() => {
+                  if (formData.players_count < 4 && i === 52) {
+                    toast.error(
+                      "Невозможно использовать колоду из 52 карт при количестве игроков меньше 4",
+                      { autoClose: 1000 }
+                    );
+                    return;
+                  }
+                  setFormData({ ...formData, cards_count: i });
+                }}
                 className={formData.cards_count !== i ? "outline" : ""}
                 key={i}
               >
@@ -450,6 +468,10 @@ const NewGameParams = () => {
                   onClick={() => {
                     if (i.name === "walker" && formData.players_count <= 3) {
                       setFormData({ ...formData, [i.name]: "neighbors" });
+                      toast.error(
+                        "Невозможно использовать режим все при количестве игроков меньше 4",
+                        { autoClose: 500 }
+                      );
                     } else {
                       setFormData({ ...formData, [i.name]: input.name });
                     }

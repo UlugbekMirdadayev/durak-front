@@ -540,6 +540,24 @@ const ProfileModal = () => {
       });
     }
   }, [opened, activeProfile]);
+
+  const [transactions, setTransactions] = useState([]);
+
+  useEffect(() => {
+    request
+      .get("/api/transaction/all", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then(({ data }) => {
+        setTransactions(data?.data?.length > 0 ? data?.data : []);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [token]);
+
+  const [searchFriend, setSearchFriend] = useState([]);
+
   return (
     <Container $visible={opened}>
       <Overlay onMouseDown={onMouseDown} onTouchStart={onMouseDown} />
@@ -742,41 +760,65 @@ const ProfileModal = () => {
               style={{ left: `calc(${33.33 * tab}% + ${sizeCalculator(2)})` }}
             />
           </Tab>
-          <Transactions>
-            {["Ожидает", "Успешно", "Отменено"].map((label) => (
-              <React.Fragment key={label}>
-                <div className="label">{label}</div>
-                {[1, 2, 3].map((_, index) => (
-                  <Card key={index}>
-                    <div className="row">
-                      <p>Номер коешлька</p>
-                      <span>29.05.2024 / 19:45</span>
-                    </div>
-                    <div className="row">
-                      <span>
-                        <b>440•••••023</b>
-                      </span>
-                      <div className="row">
-                        <p
-                          style={{
-                            color:
-                              label === "Успешно"
-                                ? "#5BA412"
-                                : label === "Отменено"
-                                ? "#FF5382"
-                                : "#5E5E5E",
-                          }}
-                        >
-                          3 500,00
-                        </p>
-                        {label === "Ожидает" ? <TimeIcon /> : null}
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </React.Fragment>
-            ))}
-          </Transactions>
+          {transactions?.length > 0 ? (
+            <Transactions>
+              {[
+                {
+                  label: "Ожидает",
+                  color: "#5E5E5E",
+                  status: "waiting",
+                },
+
+                {
+                  label: "Успешно",
+                  color: "#5BA412",
+                  status: "success",
+                },
+                {
+                  label: "Отменено",
+                  color: "#FF5382",
+                  status: "cancel",
+                },
+              ].map((category) => (
+                <React.Fragment key={category.label}>
+                  <div className="label">{category.label}</div>
+                  {transactions
+                    ?.filter(
+                      (transaction) => transaction?.status === category.status
+                    )
+                    .map((_, index) => (
+                      <Card key={index}>
+                        <div className="row">
+                          <p>Номер коешлька</p>
+                          <span>29.05.2024 / 19:45</span>
+                        </div>
+                        <div className="row">
+                          <span>
+                            <b>440•••••023</b>
+                          </span>
+                          <div className="row">
+                            <p
+                              style={{
+                                color: category.color,
+                              }}
+                            >
+                              3 500,00
+                            </p>
+                            {category.status === "waiting" ? (
+                              <TimeIcon />
+                            ) : null}
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                </React.Fragment>
+              ))}
+            </Transactions>
+          ) : (
+            <div className="empty">
+              <p>Нет операций</p>
+            </div>
+          )}
         </Operation>
         <Statistics $visible={activeProfile === "statistics"}>
           <Back
@@ -830,22 +872,79 @@ const ProfileModal = () => {
 
           <InputBox>
             <label htmlFor="find-user">Введите имя или ID</label>
-            <input type="text" id="find-user" />
-          </InputBox>
-          <UserInformation>
-            <img
-              src={"https://avatars.githubusercontent.com/u/98649872?v=4"}
-              alt="Avatar"
-              loading="lazy"
+            <input
+              type="text"
+              id="find-user"
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value.length > 0) {
+                  request
+                    .get(`/api/user/friend/find?query=${value}`, {
+                      headers: { Authorization: `Bearer ${token}` },
+                    })
+                    .then(({ data }) => {
+                      setSearchFriend(data?.data);
+                    })
+                    .catch((err) => {
+                      console.log(err);
+                    });
+                }
+              }}
             />
-            <div className="info">
-              <h1 className="disabled">
-                <span>TONKA</span>
-              </h1>
-              <p>ID: 1234567890</p>
+          </InputBox>
+          {searchFriend?.length > 0 ? (
+            searchFriend.map((s_user) => (
+              <UserInformation key={s_user?.id}>
+                <img src={s_user?.user_photo} alt="Avatar" loading="lazy" />
+
+                <div className="info">
+                  <h1 className="disabled">
+                    <span>
+                      {s_user?.first_name ||
+                        s_user?.last_name ||
+                        s_user?.username}
+                    </span>
+                  </h1>
+                  <p>ID: {s_user?.id}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    const toastId = toast.loading(
+                      "Идет добавление в друзья..."
+                    );
+                    request
+                      .get(`api/user/friend/send/${s_user?.id}`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                      })
+                      .then(({ data }) => {
+                        toast.update(toastId, {
+                          render: data?.message || "Отправлено запрос",
+                          type: "success",
+                          isLoading: false,
+                          autoClose: 2000,
+                        });
+                      })
+                      .catch((err) => {
+                        toast.update(toastId, {
+                          render: err?.response?.data?.message || "Ошибка",
+                          type: "error",
+                          isLoading: false,
+                          autoClose: 2000,
+                        });
+                        console.log(err);
+                      });
+                  }}
+                  className="primary-btn-outline"
+                >
+                  Добавить в друзья
+                </button>
+              </UserInformation>
+            ))
+          ) : (
+            <div className="empty">
+              <p>Нет результатов</p>
             </div>
-            <button className="primary-btn-outline">Добавить в друзья</button>
-          </UserInformation>
+          )}
         </FindFriends>
         <ProfilName
           $visible={activeProfile === "profil-name"}

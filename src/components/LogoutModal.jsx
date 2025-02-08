@@ -6,6 +6,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useTonConnectUI } from "@tonconnect/ui-react";
 import { setSettingVisible } from "../redux/settingsSlice";
+import { request } from "../service/api";
+import { setUser } from "../redux/userSlice";
 
 const Container = styled.div`
   position: fixed;
@@ -119,7 +121,8 @@ const LogoutModal = () => {
         window.innerHeight - newHeight >
           (window?.Telegram?.WebApp?.contentSafeAreaInset?.top || 50)
           ? newHeight
-          : newHeight - (window?.Telegram?.WebApp?.contentSafeAreaInset?.top || 50)
+          : newHeight -
+              (window?.Telegram?.WebApp?.contentSafeAreaInset?.top || 50)
       );
     },
     [dispatch]
@@ -152,6 +155,30 @@ const LogoutModal = () => {
     window.addEventListener(upListener, onMouseUp, { passive: false });
   };
 
+  const token = useSelector((state) => state?.user?.token);
+
+  const onLogout = (e) => {
+    connector.disconnect();
+    navigate("/");
+    dispatch(setLogoutVisible(false));
+    dispatch(setSettingVisible(false));
+    dispatch(setUser({}));
+    localStorage.clear();
+    request
+      .get("/api/auth/logout", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then(({ data }) => {
+        console.log(data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    e.stopPropagation();
+  };
+
   return (
     <Container $visible={visible}>
       <Overlay onMouseDown={onMouseDown} onTouchStart={onMouseDown} />
@@ -167,16 +194,7 @@ const LogoutModal = () => {
           }}
         >
           <button aria-label="Cancel Exit">Нет</button>
-          <button
-            aria-label="Confirm Exit"
-            onClick={(e) => {
-              connector.disconnect();
-              navigate("/");
-              dispatch(setLogoutVisible(false));
-              dispatch(setSettingVisible(false));
-              e.stopPropagation();
-            }}
-          >
+          <button aria-label="Confirm Exit" onClick={onLogout}>
             Да
           </button>
         </div>
