@@ -418,7 +418,7 @@ const ProfilName = styled.form`
   width: ${({ $visible }) => ($visible ? "100%" : 0)};
 `;
 
-const Complain = styled.div`
+const Complain = styled.form`
   display: flex;
   flex-direction: column;
   gap: ${sizeCalculator(20)};
@@ -920,8 +920,50 @@ const ProfileModal = () => {
           </div>
         </ProfilName>
 
-        <Complain $visible={activeProfile === "complain"}>
+        <Complain
+          $visible={activeProfile === "complain"}
+          onSubmit={(e) => {
+            e.preventDefault();
+            const complaint = e.target.complaint.value;
+            const message = e.target.message.value;
+            if (!complaint) {
+              toast.error("Пожалуйста, выберите причину жалобы");
+              return;
+            }
+            const toastId = toast.loading("Пожалуйста, подождите...");
+            request
+
+              .post("/api/complatint/send", {
+                user_id: profile?.id,
+                complaint: complaint + " " + message,
+              })
+              .then(({ data }) => {
+                toast.update(toastId, {
+                  render: data?.message || "Успешно отправлено",
+                  type: "success",
+                  isLoading: false,
+                  autoClose: 2000,
+                });
+                if (!block) {
+                  confirm("Вы хотите заблокировать пользователя?") &&
+                    setBlock(true);
+                }
+                setActiveProfile("all");
+                setHeight(window.innerHeight * 0.9 - 60);
+              })
+              .catch((err) => {
+                toast.update(toastId, {
+                  render: err?.response?.data?.message || "Ошибка",
+                  type: "error",
+                  isLoading: false,
+                  autoClose: 2000,
+                });
+                console.log(err);
+              });
+          }}
+        >
           <Back
+            type="button"
             onClick={() => {
               setActiveProfile("all");
               setHeight(window.innerHeight * 0.9 - 60);
@@ -930,7 +972,7 @@ const ProfileModal = () => {
             <ArrowIcon /> <h1 className="roboto">Причина жалобы</h1>
           </Back>
           <InputBox>
-            <select>
+            <select name="complaint" required>
               <option>Использование сторонних программ</option>
               <option>Спам</option>
               <option>Оскорбление</option>
@@ -940,18 +982,10 @@ const ProfileModal = () => {
           </InputBox>
           <InputBox>
             <label htmlFor="new-name">Ваше сообщение</label>
-            <input type="text" placeholder="Текст сообщения" />
+            <input type="text" name="message" placeholder="Текст сообщения" />
           </InputBox>
           <div className="row">
-            <button
-              style={{ width: "100%" }}
-              onClick={() => {
-                alert("Жалоба отправлена");
-                confirm("Вы хотите заблокировать пользователя?") &&
-                  setBlock(true);
-                setActiveProfile("all");
-              }}
-            >
+            <button style={{ width: "100%" }} type="submit">
               Отправить
             </button>
           </div>
