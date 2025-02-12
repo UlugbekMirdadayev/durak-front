@@ -8,6 +8,8 @@ import bg from "../assets/images/bg-welcome.png";
 import { useDispatch, useSelector } from "react-redux";
 import { setGame } from "../redux/exitSlice";
 import { toast } from "react-toastify";
+import Slider from "rc-slider";
+import "rc-slider/assets/index.css";
 
 const Container = styled.div`
   position: fixed;
@@ -40,10 +42,8 @@ const Body = styled.div`
   gap: ${sizeCalculator(10)};
   overflow: scroll;
   .bottom-row {
-    width: calc(100% + ${sizeCalculator(10)});
     position: relative;
     height: ${sizeCalculator(20)};
-    left: ${sizeCalculator(-10)};
 
     .calculator {
       position: absolute;
@@ -299,18 +299,28 @@ const NewGameParams = () => {
       <Body ref={bodyRef} style={{ height: height }}>
         <Bet $visible={step === 0}>
           <Paragraph>Ставка</Paragraph>
+
           <div className="bottom-row">
-            <Range>
-              <div
-                className="calculator"
-                style={{
-                  left: `calc(${formData.bid_amount}%)`,
-                  transform: `translateX(-${formData.bid_amount}%)`,
-                }}
-              >
-                {formData.bid_amount * 10}
-              </div>
-              <div
+            {/* <Range> */}
+            <Slider
+              min={5}
+              max={100}
+              value={formData.bid_amount}
+              onChange={(value) =>
+                setFormData({ ...formData, bid_amount: value })
+              }
+            />
+            <div
+              className="calculator"
+              style={{
+                left: `calc(${formData.bid_amount}%)`,
+                transform: `translateX(-50%)`,
+              }}
+            >
+              {formData.bid_amount * 10}
+            </div>
+          </div>
+          {/*  <div
                 className="range1"
                 style={{
                   left: `calc(${formData.bid_amount}%)`,
@@ -339,7 +349,7 @@ const NewGameParams = () => {
                 height: "100%",
               }}
             />
-          </div>
+          </div> */}
           <div className="row">
             <Button
               onClick={() => {
