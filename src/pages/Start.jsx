@@ -74,7 +74,7 @@ const Start = () => {
   const handleLogin = useCallback(async () => {
     // if (!token) return;
 
-    const payload = {
+    const payload = {  
       ...user,
       "cf-turnstile-response": "token",
     };
